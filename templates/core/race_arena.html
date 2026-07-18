@@ -8,7 +8,7 @@
             <h3 class="mb-4 fw-bold text-white"><i class="fa-solid fa-keyboard text-warning me-2"></i> Tez yozish poygasi</h3>
 
             <div class="card p-4 mb-4" style="background-color: #121824; border: 1px solid rgba(0, 242, 254, 0.15); border-radius: 15px;">
-                <p id="text-to-type" class="fs-4 text-secondary tracking-wide select-none m-0" style="line-height: 1.6;">{{ text_to_type }}</p>
+                <p id="text-to-type" class="fs-4 text-secondary tracking-wide select-none m-0" style="line-height: 1.6; letter-spacing: 0.5px; white-space: pre-wrap;"></p>
             </div>
 
             <div class="mb-4">
@@ -31,7 +31,7 @@
             </div>
 
             <div id="result-container" class="d-none mt-3">
-                <div id="result-box-card" class="alert p-4 rounded-3 d-inline-block w-100" style="background-color: #121824 !important; border: 1px solid rgba(255,255,255,0.1);">
+                <div id="result-box-card" class="alert p-4 rounded-3 d-inline-block w-100" style="background-color: #121824 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
                     <h4 id="result-status-title" class="fw-bold mb-2"></h4>
                     <p id="result-status-desc" class="text-white mb-2"></p>
                     <p id="result-status-best" class="text-muted small mb-4"></p>
@@ -63,11 +63,21 @@
     let startTime = null;
     let timerInterval = null;
     let isFinished = false;
+    let totalKeystrokes = 0;
+    let totalMistakes = 0;
+    let lastValidLength = 0;
 
-    textContainer.innerHTML = originalText.split('').map(char => `<span>${char}</span>`).join('');
+    // Har bir harfni span ichiga olish (probellarni ham yo'qotmaslik uchun)
+    textContainer.innerHTML = originalText.split('').map(char => {
+        if (char === " ") {
+            return `<span style="border-bottom: 2px dashed rgba(255,255,255,0.15);">&nbsp;</span>`;
+        }
+        return `<span>${char}</span>`;
+    }).join('');
+
     const charSpans = textContainer.querySelectorAll('span');
 
-    inputField.addEventListener('input', () => {
+    inputField.addEventListener('input', (e) => {
         if (isFinished) return;
 
         if (!startTime) {
@@ -75,27 +85,42 @@
             timerInterval = setInterval(updateTimer, 1000);
         }
 
-        const inputVal = inputField.value;
-        let mistakes = 0;
+        totalKeystrokes++;
+        let inputVal = inputField.value;
+        let currentMistakeIndex = -1;
 
-        charSpans.forEach((span, index) => {
-            const char = inputVal[index];
-            if (char == null) {
-                span.className = '';
-            } else if (char === span.innerText) {
-                span.className = 'text-success fw-bold';
-            } else {
-                span.className = 'text-danger fw-bold bg-danger bg-opacity-25';
-                mistakes++;
-            }
+        // Klasslarni tozalash
+        charSpans.forEach(span => {
+            span.classList.remove('text-success', 'fw-bold', 'text-danger', 'bg-danger', 'bg-opacity-25');
         });
 
-        if (inputVal.length > 0) {
-            let acc = Math.round(((inputVal.length - mistakes) / inputVal.length) * 100);
+        // Harflarni tekshirish
+        for (let i = 0; i < inputVal.length; i++) {
+            if (inputVal[i] === originalText[i]) {
+                if (currentMistakeIndex === -1) {
+                    charSpans[i].classList.add('text-success', 'fw-bold');
+                }
+            } else {
+                currentMistakeIndex = i;
+                charSpans[i].classList.add('text-danger', 'fw-bold', 'bg-danger', 'bg-opacity-25');
+                break;
+            }
+        }
+
+        // 📍 MUZLATISH: Agar xato qilsa, inputni xato harfdan nariga o'tkazmaymiz
+        if (currentMistakeIndex !== -1) {
+            inputField.value = inputVal.substring(0, currentMistakeIndex + 1);
+            totalMistakes++;
+        }
+
+        // Aniqlik (Accuracy)
+        if (totalKeystrokes > 0) {
+            let acc = Math.round(((totalKeystrokes - totalMistakes) / totalKeystrokes) * 100);
             accShow.innerText = acc < 0 ? 0 : acc;
         }
 
-        if (inputVal.length >= originalText.length) {
+        // O'yin tugashi
+        if (inputField.value === originalText) {
             finishRace();
         }
     });
@@ -128,35 +153,36 @@
         })
         .then(res => res.json())
         .then(data => {
-            // Dinamik vizual o'zgarishlar
-            if (data.is_new_record === true || data.is_new_record === "true") {
-                resultBoxCard.style.border = "1px solid #198754";
-                resultStatusTitle.innerText = "🔥 YANGI REKORD!";
-                resultStatusTitle.className = "fw-bold mb-2 text-success fs-4";
-                resultStatusDesc.innerHTML = `Siz shaxsiy rekordingizni yangiladingiz: <span class="fw-bold text-success">${finalWpm} WPM</span>`;
+            if (data.is_new_record === true) {
+                // 1. REKORD YANGILANSA
+                resultBoxCard.style.border = "2px solid #198754";
+                resultStatusTitle.innerText = "🔥 REKORD YANGILANDI!";
+                resultStatusTitle.className = "fw-bold mb-2 text-success fs-3";
+                resultStatusDesc.innerHTML = `Dahshatli natija! Yangi eng yuqori tezlik: <span class="fw-bold text-success fs-4">${finalWpm} WPM</span>`;
                 resultStatusBest.innerText = "";
 
                 resultActions.innerHTML = `
                     <button onclick="window.location.reload();" class="btn btn-success px-4 py-2 rounded-pill fw-bold">
                         <i class="fa-solid fa-rotate-right me-1"></i> Yana o'ynash
                     </button>
-                    <a href="/" class="btn btn-outline-light px-4 py-2 rounded-pill">
-                        <i class="fa-solid fa-house me-1"></i> Bosh sahifa
+                    <a href="{% url 'tools_home' %}" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                        <i class="fa-solid fa-gauge me-1"></i> Asboblar paneli
                     </a>
                 `;
             } else {
-                resultBoxCard.style.border = "1px solid #ffc107";
+                // 2. REKORD YANGILANMASA
+                resultBoxCard.style.border = "2px solid #ffc107";
                 resultStatusTitle.innerText = "Yana o'ynaysizmi?";
-                resultStatusTitle.className = "fw-bold mb-2 text-warning fs-4";
-                resultStatusDesc.innerHTML = `Bu safargi tezlik: <span class="fw-bold text-warning">${finalWpm} WPM</span>`;
+                resultStatusTitle.className = "fw-bold mb-2 text-warning fs-3";
+                resultStatusDesc.innerHTML = `Bu safargi tezligingiz: <span class="fw-bold text-warning fs-5">${finalWpm} WPM</span>`;
                 resultStatusBest.innerText = `Sizning eng yaxshi rekordingiz: ${data.best_wpm} WPM`;
 
                 resultActions.innerHTML = `
                     <button onclick="window.location.reload();" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark">
                         <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
                     </button>
-                    <a href="/" class="btn btn-outline-light px-4 py-2 rounded-pill">
-                        <i class="fa-solid fa-house me-1"></i> Bosh sahifa
+                    <a href="{% url 'tools_home' %}" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                        <i class="fa-solid fa-gauge me-1"></i> Asboblar paneli
                     </a>
                 `;
             }
@@ -171,7 +197,7 @@
 </script>
 
 <style>
-    .tracking-wide span { transition: all 0.1s ease; }
+    .tracking-wide span { transition: all 0.05s ease; }
     .select-none { user-select: none; }
 </style>
 {% endblock %}

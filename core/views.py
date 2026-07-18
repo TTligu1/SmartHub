@@ -8,7 +8,7 @@ from barcode.writer import ImageWriter
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
-from django.db.models import Max, Q  # 📍 CHAT QIDIRUVI UCHUN 'Q' IMPORT QILINDI
+from django.db.models import Max, Q
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -297,7 +297,7 @@ def races_list(request):
     return render(request, 'core/races_list.html', {'leaderboard': leaderboard})
 
 
-# 📍 REKORD TAQQOSLASH LOGIKASI BILAN YANGILANGAN FUNKSIYA
+# 📍 100% TO'G'RI REKORD TAQQOSLASH FUNKSIYASI
 @login_required(login_url='login')
 def save_race_result(request):
     if request.method == "POST":
@@ -309,20 +309,20 @@ def save_race_result(request):
             if new_wpm <= 0:
                 return JsonResponse({'status': 'ignored'})
 
-            # Foydalanuvchining shu vaqtgacha bo'lgan eng yuqori WPM rekordini topamiz
-            highest_wpm = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))['wpm__max']
+            # Bazadagi eng katta rekordni tekshiramiz
+            highest_wpm_data = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))
+            highest_wpm = highest_wpm_data['wpm__max']
 
             is_new_record = False
-            # Agar oldin rekordi bo'lmasa yoki yangi wpm eski rekorddan katta bo'lsa
             if highest_wpm is None or new_wpm > highest_wpm:
                 is_new_record = True
-                # Yangi rekordni bazaga yozamiz
-                TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
                 best_to_return = new_wpm
             else:
-                # Agar rekord yangilanmagan bo'lsa ham oddiy urinish sifatida saqlashni xohlasangiz:
-                TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
+                is_new_record = False
                 best_to_return = highest_wpm
+
+            # Urinishni bazaga qayd qilamiz
+            TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
 
             return JsonResponse({
                 'status': 'success',
@@ -404,44 +404,3 @@ def send_message(request):
 @login_required(login_url='login')
 def user_chat_room(request):
     return render(request, 'core/user_chat_room.html')
-
-
-# 📍 MUTLAQ TO'G'RI REKORD TAQQOSLASH LOGIKASI
-@login_required(login_url='login')
-def save_race_result(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            new_wpm = int(data.get('wpm', 0))
-            new_accuracy = int(data.get('accuracy', 0))
-
-            if new_wpm <= 0:
-                return JsonResponse({'status': 'ignored'})
-
-            # 1. Foydalanuvchining shu paytgacha bo'lgan ENG YAXSHI rekordini olamiz
-            highest_wpm_data = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))
-            highest_wpm = highest_wpm_data['wpm__max']
-
-            # 2. Yangi natija rekorddan kattami yoki birinchi o'yinimi?
-            is_new_record = False
-            if highest_wpm is None:
-                is_new_record = True
-                best_to_return = new_wpm
-            elif new_wpm > highest_wpm:
-                is_new_record = True
-                best_to_return = new_wpm
-            else:
-                is_new_record = False
-                best_to_return = highest_wpm
-
-            # 3. Har qanday holatda ham ushbu urinishni bazaga saqlaymiz
-            TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
-
-            return JsonResponse({
-                'status': 'success',
-                'is_new_record': is_new_record,
-                'best_wpm': best_to_return
-            })
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    return JsonResponse({'status': 'error'}, status=400)
