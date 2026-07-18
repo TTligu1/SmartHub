@@ -66,7 +66,7 @@
     let totalKeystrokes = 0;
     let totalMistakes = 0;
 
-    // Matnni spanlarga ajratish
+    // Matnni span elementlariga ajratib joylash (probellarni saqlagan holda)
     textContainer.innerHTML = originalText.split('').map(char => {
         if (char === " ") {
             return `<span style="border-bottom: 2px dashed rgba(255,255,255,0.15);">&nbsp;</span>`;
@@ -76,11 +76,11 @@
 
     const charSpans = textContainer.querySelectorAll('span');
 
-    // 📍 1. MUKAMMAL STRATEGIYA: Tugma bosilgandayoq xatoni tekshirib, yozdirishni cheklash
+    // 📍 1. Bosilgandayoq xatoni tekshirish va uni inputga mutlaqo yozdirmaslik logikasi
     inputField.addEventListener('keydown', (e) => {
         if (isFinished) return;
 
-        // Boshqaruv tugmalariga ruxsat beramiz (Backspace, Delete, Arrow, Enter va hkz)
+        // Boshqaruv klavishlariga (Backspace, Enter, Arrows) ruxsat berish
         if (e.key.length > 1) return;
 
         if (!startTime) {
@@ -92,12 +92,11 @@
         const currentPos = inputField.value.length;
         const expectedChar = originalText[currentPos];
 
-        // Agar kiritilayotgan belgi kutilayotgan belgiga teng bo'lmasa -> BLOKLAYMIZ
+        // Agar kiritilgan harf kutilayotgan harf bilan mos kelmasa, yozishni bloklash
         if (e.key !== expectedChar) {
-            e.preventDefault(); // Inputga yozilishini taqiqlash
+            e.preventDefault();
             totalMistakes++;
 
-            // Xato harfni matnda vizual ko'rsatish
             if(charSpans[currentPos]) {
                 charSpans[currentPos].classList.add('text-danger', 'fw-bold', 'bg-danger', 'bg-opacity-25');
             }
@@ -106,13 +105,12 @@
         }
     });
 
-    // 📍 2. To'g'ri yozilgandagi vizual effektlar
+    // 📍 2. To'g'ri yozilgan harflarni yashil rangga o'tkazish
     inputField.addEventListener('input', () => {
         if (isFinished) return;
 
         let inputVal = inputField.value;
 
-        // Klasslarni yangilash
         charSpans.forEach((span, i) => {
             if (i < inputVal.length) {
                 span.classList.remove('text-danger', 'bg-danger', 'bg-opacity-25');
@@ -124,7 +122,6 @@
 
         updateAccuracy();
 
-        // Tugashini tekshirish
         if (inputVal === originalText) {
             finishRace();
         }
@@ -147,13 +144,14 @@
         }
     }
 
+    // 📍 3. Natijani backend-ga yuborish va rekord holatini qat'iy tekshirish
     function finishRace() {
         clearInterval(timerInterval);
         isFinished = true;
         inputField.disabled = true;
 
-        const finalWpm = wpmShow.innerText;
-        const finalAccuracy = accShow.innerText;
+        const finalWpm = parseInt(wpmShow.innerText) || 0;
+        const finalAccuracy = parseInt(accShow.innerText) || 0;
 
         fetch("{% url 'save_race_result' %}", {
             method: "POST",
@@ -165,6 +163,7 @@
         })
         .then(res => res.json())
         .then(data => {
+            // Backend-dan kelgan bool qiymatni qat'iy tekshirish (false bo'lsa rekord deyilmaydi)
             if (data.is_new_record === true) {
                 resultBoxCard.style.border = "2px solid #198754";
                 resultStatusTitle.innerText = "🔥 REKORD YANGILANDI!";

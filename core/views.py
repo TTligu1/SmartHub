@@ -297,7 +297,7 @@ def races_list(request):
     return render(request, 'core/races_list.html', {'leaderboard': leaderboard})
 
 
-# 📍 100% TO'G'RI REKORD TAQQOSLASH FUNKSIYASI
+# 📍 ZANJIRLI VA XATOSIZ ISHLAYDIGAN REKORD SAQLASH FUNKSIYASI
 @login_required(login_url='login')
 def save_race_result(request):
     if request.method == "POST":
@@ -307,27 +307,32 @@ def save_race_result(request):
             new_accuracy = int(data.get('accuracy', 0))
 
             if new_wpm <= 0:
-                return JsonResponse({'status': 'ignored'})
+                return JsonResponse({'status': 'ignored', 'is_new_record': False, 'best_wpm': 0})
 
-            # Bazadagi eng katta rekordni tekshiramiz
+            # Bazadagi haqiqiy shaxsiy maksimal rekordni topamiz
             highest_wpm_data = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))
             highest_wpm = highest_wpm_data['wpm__max']
 
             is_new_record = False
-            if highest_wpm is None or new_wpm > highest_wpm:
+
+            if highest_wpm is None:
+                is_new_record = True
+                best_to_return = new_wpm
+            elif new_wpm > highest_wpm:
                 is_new_record = True
                 best_to_return = new_wpm
             else:
                 is_new_record = False
                 best_to_return = highest_wpm
 
-            # Urinishni bazaga qayd qilamiz
+            # Natijani bazaga saqlaymiz
             TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
 
+            # JavaScript qat'iy boolean sifatida qabul qilishi uchun bool() bilan o'rab qaytaramiz
             return JsonResponse({
                 'status': 'success',
-                'is_new_record': is_new_record,
-                'best_wpm': best_to_return
+                'is_new_record': bool(is_new_record),
+                'best_wpm': int(best_to_return)
             })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
