@@ -1,140 +1,397 @@
-<div class="modal fade" id="telegramChatModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 650px; margin: 1.75rem auto;">
-        <div class="modal-content text-white border-0 shadow-lg" style="background-color: #161c2a; border-radius: 12px; overflow: hidden; height: 500px;">
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-            <div class="modal-header border-bottom border-secondary border-opacity-25 p-3" style="background-color: #161c2a;">
-                <h6 class="modal-title fw-bold d-flex align-items-center m-0" style="font-size: 1rem;">
-                    <i class="fa-solid fa-paper-plane text-info me-2"></i> SmartHub Telegram Chat
-                </h6>
-                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
+    <style>
+        body {
+            background-color: #0f131f;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background-color: #121824;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+        }
+        .nav-link {
+            color: #a0aec0 !important;
+            transition: color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #00f2fe !important;
+        }
+
+        /* 📍 NAVBAR ICHIDAGI TELEGRAM USLUBIDAGI DUMALOCH AVATAR */
+        .profile-avatar-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #0f131f;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+            transition: transform 0.2s;
+        }
+        .profile-avatar-circle:hover {
+            transform: scale(1.05);
+        }
+
+        /* 🎨 YANGA INTEGRATSIYA: TELEGRAM ADVANCED CHAT INTERFEYSI STILLARI */
+        .tg-widget-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 99999 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* 🎯 TEPADA TURING DEYILGAN TELEGRAM IKONKALI DUMALOQ TUGMA */
+        .tg-toggle-btn {
+            width: 60px;
+            height: 60px;
+            background-color: #24A1DE;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(36, 161, 222, 0.4);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tg-toggle-btn:hover { transform: scale(1.06); }
+
+        /* 💻 BOSGANDA OCHILADIGAN TELEGRAM INTERFEYSLI OYNA */
+        .tg-chat-window {
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            width: 680px;
+            height: 500px;
+            background-color: #17212b;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            border: 1px solid #24303f;
+            display: none; /* Dastlab yopiq */
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .tg-chat-window.show { display: flex; }
+        .tg-chat-header {
+            background-color: #24303f;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2a36;
+        }
+        .tg-close-btn { background: none; border: none; color: #7f91a4; font-size: 1.6rem; cursor: pointer; }
+        .tg-close-btn:hover { color: #fff; }
+
+        .tg-chat-main { display: flex; flex-grow: 1; height: calc(100% - 49px); }
+
+        /* 📂 CHAP PANEL: Foydalanuvchilar va Guruhlar Ro'yxati */
+        .tg-sidebar {
+            width: 240px;
+            background-color: #17212b;
+            border-right: 1px solid #10171e;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .tg-users-list { display: flex; flex-direction: column; }
+        .tg-tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #10171e;
+            transition: background 0.2s;
+        }
+        .tg-tab:hover, .tg-tab.active { background-color: #202b36; }
+        .tg-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.85rem;
+            background-color: #2b5278;
+        }
+        .tg-avatar.bg-purple { background-color: #6c5ce7; }
+        .tg-tab-info { display: flex; flex-direction: column; overflow: hidden; }
+        .tg-tab-name { color: #fff; font-size: 0.85rem; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        /* 💬 O'NG PANEL: Yozishmalar oynasi */
+        .tg-body { flex-grow: 1; display: flex; flex-direction: column; background-color: #0e1621; }
+        .tg-body-header { background-color: #17212b; padding: 12px 16px; color: #fff; font-size: 0.9rem; font-weight: bold; border-bottom: 1px solid #10171e; }
+        .tg-messages-area { flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .tg-msg { max-width: 75%; padding: 7px 11px; border-radius: 8px; font-size: 0.85rem; color: #fff; line-height: 1.4; position: relative; }
+        .tg-msg.inc { background-color: #182533; align-self: flex-start; border-bottom-left-radius: 3px; }
+        .tg-msg.out { background-color: #2b5278; align-self: flex-end; border-bottom-right-radius: 3px; margin-left: auto; }
+        .tg-msg-user { font-size: 0.75rem; color: #5288c1; font-weight: bold; margin-bottom: 2px; }
+        .tg-msg-time { font-size: 0.65rem; color: #7f91a4; text-align: right; margin-top: 3px; }
+
+        .tg-footer { padding: 10px 14px; background-color: #17212b; display: flex; gap: 10px; align-items: center; }
+        .tg-footer input { flex-grow: 1; background-color: #111922; border: 1px solid #202b36; padding: 9px 14px; border-radius: 20px; color: white; font-size: 0.85rem; outline: none; }
+        .tg-footer button { background: none; border: none; color: #5288c1; font-size: 1.2rem; cursor: pointer; }
+        .tg-footer button:hover { color: #24A1DE; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-2 mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="{% url 'home' %}">
+                🚀 SmartHub
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'home' %}">Bosh sahifa</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'tools_home' %}">Asboblar paneli</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'ai_chat' %}">AI</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'pdf_tools' %}">PDF</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'image_tools' %}">Image Tools</a></li>
+                    <li class="nav-item"><a class="nav-link px-3 fw-semibold" href="{% url 'race_arena' %}">⌨️ Tez yozar</a></li>
+                </ul>
+
+                {% if user.is_authenticated %}
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <div class="d-flex align-items-center gap-2" id="profileToggleTrigger" style="cursor: pointer;">
+                        <div class="profile-avatar-circle">
+                            {{ user.username|slice:":2"|upper }}
+                        </div>
+                        <span class="text-info fw-medium d-none d-sm-inline">@{{ user.username }}</span>
+                    </div>
+
+                    <form action="{% url 'logout' %}" method="POST" class="m-0 d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger px-2.5 py-1 rounded-pill" style="font-size: 0.8rem;">
+                            Chiqish
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <div class="tg-widget-container">
+        <button class="tg-toggle-btn" id="widgetChatToggle">
+            <i class="fa-brands fa-telegram"></i>
+        </button>
+
+        <div class="tg-chat-window" id="widgetChatBox">
+            <div class="tg-chat-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-brands fa-telegram text-info fs-4"></i>
+                    <h6 class="m-0 fw-bold text-white">SmartHub Telegram Chat</h6>
+                </div>
+                <button class="tg-close-btn" id="widgetChatClose">&times;</button>
             </div>
 
-            <div class="modal-body p-0 d-flex" style="height: calc(100% - 56px); background-color: #0e121a;">
-
-                <div class="border-end border-secondary border-opacity-25 d-flex flex-column" style="width: 35%; background-color: #161c2a; padding: 10px;">
-                    <div class="d-flex align-items-center p-2 rounded" style="background-color: rgba(255, 255, 255, 0.05); cursor: pointer;">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px; min-width: 38px; background-color: #6366f1;">
-                            <i class="fa-solid fa-users text-white" style="font-size: 0.9rem;"></i>
-                        </div>
-                        <div style="line-height: 1.2; overflow: hidden;">
-                            <strong style="font-size: 0.85rem; display: block; white-space: nowrap; text-overflow: ellipsis;">Umumiy Chat</strong>
-                            <small class="text-muted" style="font-size: 0.75rem;">Hamma yozishadi</small>
+            <div class="tg-chat-main">
+                <div class="tg-sidebar">
+                    <div class="tg-tab active" id="tabGeneral" onclick="switchChat('general', null, 'Umumiy Chat')">
+                        <div class="tg-avatar bg-purple"><i class="fa-solid fa-users"></i></div>
+                        <div class="tg-tab-info">
+                            <span class="tg-tab-name">Umumiy Chat</span>
+                            <small class="text-muted" style="font-size:0.7rem;">Hamma yozishadi</small>
                         </div>
                     </div>
+                    <div class="tg-users-list" id="tgUsersList"></div>
                 </div>
 
-                <div class="d-flex flex-column" style="width: 65%; height: 100%;">
-
-                    <div class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2" id="modal-messages-box" style="height: calc(100% - 60px);">
-                        <div class="text-center text-muted my-auto" style="font-size: 0.85rem;">Xabarlar yuklanmoqda...</div>
-                    </div>
-
-                    <div class="p-2 border-top border-secondary border-opacity-10 d-flex align-items-center" style="background-color: #161c2a; height: 60px;">
-                        <div class="d-flex w-100 align-items-center gap-2 bg-dark rounded-pill px-3 py-1" style="background-color: #0e121a !important;">
-                            <input type="text" id="modal-chat-input" class="form-control border-0 text-white shadow-none bg-transparent p-1"
-                                   placeholder="Xabar yozing..." autocomplete="off" style="font-size: 0.9rem;">
-
-                            <button type="button" id="modal-send-btn" class="btn p-0 border-0 shadow-none d-flex align-items-center justify-content-center" style="background: transparent;">
-                                <i class="fa-solid fa-paper-plane text-info" style="font-size: 1.1rem; cursor: pointer;"></i>
-                            </button>
+                <div class="tg-body">
+                    <div class="tg-body-header" id="activeChatTitle">Umumiy Chat</div>
+                    <div class="tg-messages-area" id="tgMsgArea">
                         </div>
+                    <div class="tg-footer">
+                        <input type="text" placeholder="Xabar yozing..." id="tgInput">
+                        <button id="tgSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     </div>
-</div>
 
-<style>
-    /* Scrollbar faqat ichki oyna uchun ishlaydi, tashqi sahifani buzmaydi */
-    #modal-messages-box::-webkit-scrollbar { width: 4px; }
-    #modal-messages-box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-</style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const sendBtn = document.getElementById("modal-send-btn");
-        const chatInput = document.getElementById("modal-chat-input");
-        const messagesBox = document.getElementById("modal-messages-box");
+    <script>
+        let currentChatType = 'general';
+        let currentTargetUserId = null;
 
-        // O'ng pastki burchakdagi Telegram aylanma tugmasini modalga bog'lash
-        const floatChatBtn = document.querySelector('.fixed-bottom, [class*="fa-paper-plane"], .rounded-circle img, a[href*="chat"]');
-        if (floatChatBtn) {
-            floatChatBtn.setAttribute("data-bs-toggle", "modal");
-            floatChatBtn.setAttribute("data-bs-target", "#telegramChatModal");
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("widgetChatToggle");
+            const closeBtn = document.getElementById("widgetChatClose");
+            const chatBox = document.getElementById("widgetChatBox");
+            const profileTrigger = document.getElementById("profileToggleTrigger");
+            const sendBtn = document.getElementById("tgSendBtn");
+            const inputField = document.getElementById("tgInput");
 
-        function loadModalMessages() {
-            fetch('/api/get-messages/?type=general')
-                .then(res => res.json())
-                .then(data => {
-                    if (messagesBox) {
-                        const isAtBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 60;
-                        messagesBox.innerHTML = '';
-
-                        if (!data.messages || data.messages.length === 0) {
-                            messagesBox.innerHTML = '<div class="text-center text-muted my-auto" style="font-size: 0.85rem;">Suhbat bo\'sh.</div>';
-                            return;
-                        }
-
-                        data.messages.forEach(msg => {
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'd-flex mb-1';
-                            const isMe = msg.sender === "{{ request.user.username }}";
-                            msgDiv.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
-
-                            msgDiv.innerHTML = `
-                                <div style="max-width: 85%; padding: 6px 12px; border-radius: 12px;
-                                            background-color: ${isMe ? '#2b5278' : '#1e2738'}; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
-                                    ${!isMe ? `<small style="color: #00f2fe; display: block; font-weight: bold; font-size: 0.75rem; margin-bottom: 2px;">@${msg.sender}</small>` : ''}
-                                    <span style="font-size: 0.88rem; word-break: break-word;">${msg.text}</span>
-                                    <small style="display: block; text-align: right; font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 2px;">${msg.time}</small>
-                                </div>
-                            `;
-                            messagesBox.appendChild(msgDiv);
-                        });
-
-                        if (isAtBottom) {
-                            messagesBox.scrollTop = messagesBox.scrollHeight;
-                        }
+            // Oynani ochish va yopish boshqaruvi
+            if(toggleBtn && chatBox) {
+                toggleBtn.addEventListener("click", function() {
+                    chatBox.classList.toggle("show");
+                    if(chatBox.classList.contains("show")) {
+                        loadUsers();
+                        loadMessages();
                     }
-                }).catch(err => console.log("Yuklashda xatolik"));
+                });
+            }
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function() {
+                    chatBox.classList.remove("show");
+                });
+            }
+            if (profileTrigger && chatBox) {
+                profileTrigger.addEventListener("click", function() {
+                    chatBox.classList.toggle("show");
+                    if(chatBox.classList.contains("show")) {
+                        loadUsers();
+                        loadMessages();
+                    }
+                });
+            }
+
+            // Xabar jo'natish hodisalari
+            if(sendBtn) sendBtn.addEventListener("click", sendMessage);
+            if(inputField) {
+                inputField.addEventListener("keypress", function(e) {
+                    if(e.key === 'Enter') sendMessage();
+                });
+            }
+
+            // Avtomatik yangilash (Har 4 sekundda yangi xabarlarni tortadi)
+            setInterval(() => {
+                if(chatBox && chatBox.classList.contains("show")) {
+                    loadMessages();
+                }
+            }, 4000);
+        });
+
+        // 📂 Bazadagi foydalanuvchilar ro'yxatini chap panelga chiqarish
+        function loadUsers() {
+            fetch('/chat/users/')
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById("tgUsersList");
+                if(!listContainer) return;
+                listContainer.innerHTML = "";
+                data.users.forEach(u => {
+                    const initials = u.username.slice(0,2).toUpperCase();
+                    listContainer.innerHTML += `
+                        <div class="tg-tab" id="user-tab-${u.id}" onclick="switchChat('private', ${u.id}, '@${u.username}')">
+                            <div class="tg-avatar">${initials}</div>
+                            <div class="tg-tab-info">
+                                <span class="tg-tab-name">@${u.username}</span>
+                                <small class="text-muted" style="font-size:0.65rem;">Yozishish uchun ezing</small>
+                            </div>
+                        </div>
+                    `;
+                });
+            }).catch(err => console.log("Foydalanuvchilarni yuklashda xato yoki API yo'li o'rnatilmagan."));
         }
 
-        function sendModalMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
+        // 🔄 Umumiy va Shaxsiy chatlar o'rtasida o'tish logikasi
+        function switchChat(type, userId, title) {
+            currentChatType = type;
+            currentTargetUserId = userId;
+            document.getElementById("activeChatTitle").innerText = title;
 
-            fetch('/api/send-message/', {
+            document.querySelectorAll('.tg-tab').forEach(t => t.classList.remove('active'));
+            if(type === 'general') {
+                document.getElementById('tabGeneral').classList.add('active');
+            } else if(userId) {
+                const activeTab = document.getElementById(`user-tab-${userId}`);
+                if(activeTab) activeTab.classList.add('active');
+            }
+
+            loadMessages();
+        }
+
+        // 📥 Tanlangan chatga tegishli xabarlarni backenddan yuklash
+        function loadMessages() {
+            let url = `/chat/messages/?type=${currentChatType}`;
+            if(currentChatType === 'private') url += `&user_id=${currentTargetUserId}`;
+
+            fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const area = document.getElementById("tgMsgArea");
+                if(!area) return;
+                area.innerHTML = "";
+                data.messages.forEach(m => {
+                    const isOut = m.sender === "{{ user.username }}";
+                    area.innerHTML += `
+                        <div class="tg-msg ${isOut ? 'out' : 'inc'}">
+                            ${currentChatType === 'general' && !isOut ? `<div class="tg-msg-user">@${m.sender}</div>` : ''}
+                            <div class="tg-msg-content">${m.text}</div>
+                            <div class="tg-msg-time">${m.time}</div>
+                        </div>
+                    `;
+                });
+                area.scrollTop = area.scrollHeight;
+            }).catch(err => {
+                // API hali ulanmagan bo'lsa frontdagi statik vizual dizayn buzilmasligi uchun namuna
+                const area = document.getElementById("tgMsgArea");
+                if(area && area.children.length === 0) {
+                    area.innerHTML = `<div class="text-center text-muted small mt-4">API yo'llari (views.py) tekshirilmoqda...</div>`;
+                }
+            });
+        }
+
+        // 📤 Xabarni serverga uzatish
+        function sendMessage() {
+            const input = document.getElementById("tgInput");
+            if(!input || !input.value.trim()) return;
+
+            const payload = {
+                type: currentChatType,
+                text: input.value,
+                user_id: currentTargetUserId
+            };
+
+            fetch('/chat/send/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({ text: text, type: 'general' })
+                body: JSON.stringify(payload)
             })
             .then(res => res.json())
             .then(data => {
-                if (data.status === 'success') {
-                    chatInput.value = '';
-                    loadModalMessages();
-                    setTimeout(() => { messagesBox.scrollTop = messagesBox.scrollHeight; }, 50);
+                if(data.status === 'success') {
+                    input.value = "";
+                    loadMessages();
                 }
-            }).catch(err => console.log("Yuborishda xatolik"));
-        }
-
-        if (sendBtn) sendBtn.addEventListener("click", sendModalMessage);
-        if (chatInput) {
-            chatInput.addEventListener("keypress", function (e) {
-                if (e.key === 'Enter') sendModalMessage();
             });
         }
-
-        loadModalMessages();
-        // Har 3 soniyada xabarlar yangilanib turadi
-        setInterval(loadModalMessages, 3000);
-    });
-</script>
+    </script>
+</body>
+</html>
