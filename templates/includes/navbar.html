@@ -22,9 +22,7 @@
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <button class="btn btn-link text-info fw-medium text-decoration-none p-0 d-flex align-items-center border-0 shadow-none"
                         type="button"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#chatSidebar"
-                        aria-controls="chatSidebar">
+                        id="chatToggleBtn">
                     <i class="fa-solid fa-user-circle me-1" style="font-size: 1.1rem;"></i> @{{ user.username }}
                 </button>
 
@@ -40,41 +38,34 @@
     </div>
 </nav>
 
-<div class="offcanvas offcanvas-start border-0 text-white shadow-lg"
-     tabindex="-1"
-     id="chatSidebar"
-     aria-labelledby="chatSidebarLabel"
-     style="background-color: #161c2a; width: 380px;">
-
-    <div class="offcanvas-header border-bottom border-secondary border-opacity-25" style="background-color: #0f131f;">
-        <h5 class="offcanvas-title fw-bold text-info m-0" id="chatSidebarLabel">
+<div class="custom-chat-sidebar text-white shadow-lg" id="customChatSidebar">
+    <div class="sidebar-header border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold text-info m-0" style="font-size: 1.1rem;">
             <i class="fa-solid fa-paper-plane me-2"></i> SmartHub Chat
         </h5>
-        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white shadow-none" id="chatCloseBtn"></button>
     </div>
 
-    <div class="offcanvas-body d-flex flex-column p-0 bg-transparent">
-
+    <div class="sidebar-body d-flex flex-column h-100">
         <div class="p-3 bg-black bg-opacity-10 border-bottom border-secondary border-opacity-10">
             <div class="d-flex gap-3 mb-3" style="font-size: 0.85rem;">
                 <span class="text-info fw-bold border-bottom border-2 border-info pb-1 cursor-pointer"><i class="fa-solid fa-comment me-1"></i> Shaxsiy (1)</span>
-                <span class="text-white-50 cursor-pointer hover-text-white transition-all"><i class="fa-solid fa-users me-1"></i> Guruhlar</span>
+                <span class="text-white-50 cursor-pointer"><i class="fa-solid fa-users me-1"></i> Guruhlar</span>
             </div>
             <div class="position-relative">
-                <input type="text" class="form-control bg-dark border-0 text-white rounded-3 py-2 ps-5 shadow-none" placeholder="Ism yoki familiya bo'yicha qidirish..." style="font-size: 0.85rem; background-color: #0f131f !important;">
+                <input type="text" class="form-control bg-dark border-0 text-white rounded-3 py-2 ps-5 shadow-none" placeholder="Ism yoki familiya..." style="font-size: 0.85rem; background-color: #0f131f !important;">
                 <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 15px; top: 12px; font-size: 0.85rem;"></i>
             </div>
         </div>
 
-        <div class="flex-grow-1 overflow-y-auto p-2" style="background-color: #0f131f;">
+        <div class="flex-grow-1 overflow-y-auto p-2" style="background-color: #0f131f; max-height: calc(100vh - 180px);">
             <div class="d-flex flex-column gap-1">
-
-                <div class="d-flex align-items-center p-3 rounded-3 active-chat-item cursor-pointer transition-all">
+                <div class="d-flex align-items-center p-3 rounded-3 active-chat-item cursor-pointer">
                     <div class="position-relative me-3">
                         <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 42px; height: 42px; background-color: #2b5278;">
                             AH
                         </div>
-                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle" title="Onlayn"></span>
+                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle"></span>
                     </div>
                     <div class="flex-grow-1 text-truncate">
                         <div class="d-flex justify-content-between align-items-center mb-1">
@@ -83,52 +74,79 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-info text-truncate pe-2" style="font-size: 0.75rem;">Siz: o'yindan chiqing</small>
-                            <span class="badge bg-danger rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 16px; height: 16px; font-size: 0.65rem; min-width: 16px;">1</span>
+                            <span class="badge bg-danger rounded-circle p-0" style="width: 16px; height: 16px; font-size: 0.65rem; line-height: 16px; text-align: center;">1</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="d-flex align-items-center p-3 rounded-3 hover-bg-dark cursor-pointer transition-all">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white-50 fw-bold" style="width: 42px; height: 42px; background-color: #1c2333;">
-                        SM
-                    </div>
-                    <div class="flex-grow-1 text-truncate ms-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-white-50 fw-semibold small">shuhratbek marupov</span>
-                            <span class="text-muted" style="font-size: 0.7rem;">11:20</span>
-                        </div>
-                        <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">https://github.com/Marup0v/arsha</small>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center p-3 rounded-3 hover-bg-dark cursor-pointer transition-all">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white-50 fw-bold" style="width: 42px; height: 42px; background-color: #1c2333;">
-                        MM
-                    </div>
-                    <div class="flex-grow-1 text-truncate ms-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-white-50 fw-semibold small">Muhammadumar Mux...</span>
-                            <span class="text-muted" style="font-size: 0.7rem;">11:20</span>
-                        </div>
-                        <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">😂</small>
-                    </div>
-                </div>
-
             </div>
         </div>
-
     </div>
 </div>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <style>
     .cursor-pointer { cursor: pointer; }
-    .transition-all { transition: all 0.2s ease-in-out; }
-    .hover-text-white:hover { color: #fff !important; }
-    .hover-bg-dark:hover { background-color: rgba(255, 255, 255, 0.03) !important; }
-    .active-chat-item {
-        background-color: rgba(0, 242, 254, 0.08) !important;
-        border-left: 3px solid #00f2fe;
+    .custom-chat-sidebar {
+        position: fixed;
+        top: 0;
+        left: -380px; /* Yashirin holat */
+        width: 380px;
+        height: 100vh;
+        background-color: #161c2a;
+        z-index: 1060;
+        transition: left 0.3s ease-in-out;
     }
+    .custom-chat-sidebar.show {
+        left: 0; /* Ochiq holat */
+    }
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        display: none;
+    }
+    .sidebar-overlay.show {
+        display: block;
+    }
+    .sidebar-header { background-color: #0f131f; }
+    .active-chat-item { background-color: rgba(0, 242, 254, 0.08) !important; border-left: 3px solid #00f2fe; }
     .overflow-y-auto::-webkit-scrollbar { width: 4px; }
     .overflow-y-auto::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("chatToggleBtn");
+        const closeBtn = document.getElementById("chatCloseBtn");
+        const sidebar = document.getElementById("customChatSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+
+        if(toggleBtn && sidebar && overlay) {
+            // Profil bosilganda ochish/yopish
+            toggleBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                sidebar.classList.toggle("show");
+                overlay.classList.toggle("show");
+            });
+
+            // Yopish (X) tugmasi bosilganda
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function() {
+                    sidebar.classList.remove("show");
+                    overlay.classList.remove("show");
+                });
+            }
+
+            // Orqa fonga bosilganda yopish
+            overlay.addEventListener("click", function() {
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+            });
+        }
+    });
+</script>
