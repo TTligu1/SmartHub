@@ -1,31 +1,45 @@
 <div class="modal fade" id="telegramChatModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px; margin: 30px auto;">
-        <div class="modal-content text-white" style="background-color: #161c2a; border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+        <div class="modal-content text-white border-0" style="background-color: #161c2a; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
 
-            <div class="modal-header border-bottom border-secondary border-opacity-25 p-3">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 p-3" style="background-color: #161c2a;">
                 <h6 class="modal-title fw-bold d-flex align-items-center m-0" style="font-size: 1rem;">
                     <i class="fa-solid fa-paper-plane text-info me-2"></i> SmartHub Telegram Chat
                 </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
             </div>
 
-            <div class="modal-body p-2 d-flex flex-column" style="height: 320px; background-color: #0e121a;">
-                <div class="flex-grow-1 overflow-y-auto d-flex flex-column gap-2 p-2" id="modal-messages-box">
-                    <div class="text-center text-muted my-auto" style="font-size: 0.85rem;">Xabarlar yuklanmoqda...</div>
-                </div>
-            </div>
+            <div class="modal-body p-0 d-flex" style="height: 400px; background-color: #0e121a;">
 
-            <div class="modal-footer border-top border-secondary border-opacity-10 p-2" style="background-color: #161c2a;">
-                <div class="d-flex w-100 align-items-center gap-2">
-                    <input type="text" id="modal-chat-input" class="form-control text-white border-0 py-2 px-3 shadow-none"
-                           placeholder="Xabarni yozing..." autocomplete="off"
-                           style="border-radius: 20px; font-size: 0.9rem; background-color: #1f293d !important;">
-
-                    <button type="button" id="modal-send-btn" class="btn btn-info d-flex align-items-center justify-content-center p-0 shadow-sm"
-                            style="border-radius: 50%; width: 36px; height: 36px; min-width: 36px;">
-                        <i class="fa-solid fa-paper-plane text-dark" style="font-size: 0.85rem;"></i>
-                    </button>
+                <div class="border-end border-secondary border-opacity-25" style="width: 35%; background-color: #161c2a; padding: 10px;">
+                    <div class="d-flex align-items-center p-2 rounded active" style="background-color: rgba(255, 255, 255, 0.05); cursor: pointer;">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; min-width: 36px; background-color: #6366f1 !important;">
+                            <i class="fa-solid fa-users text-white" style="font-size: 0.9rem;"></i>
+                        </div>
+                        <div style="line-height: 1.2;">
+                            <strong style="font-size: 0.85rem; display: block;">Umumiy Chat</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Hamma yozishadi</small>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="d-flex flex-column" style="width: 65%;">
+                    <div class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2" id="modal-messages-box">
+                        <div class="text-center text-muted my-auto" style="font-size: 0.85rem;">Xabarlar yuklanmoqda...</div>
+                    </div>
+
+                    <div class="p-2 border-top border-secondary border-opacity-10" style="background-color: #161c2a;">
+                        <div class="d-flex align-items-center gap-2 bg-dark rounded-pill px-3 py-1" style="background-color: #0e121a !important;">
+                            <input type="text" id="modal-chat-input" class="form-control border-0 text-white shadow-none bg-transparent p-1"
+                                   placeholder="Xabar yozing..." autocomplete="off" style="font-size: 0.9rem;">
+
+                            <button type="button" id="modal-send-btn" class="btn p-0 border-0 shadow-none d-flex align-items-center justify-content-center" style="background: transparent;">
+                                <i class="fa-solid fa-paper-plane text-info" style="font-size: 1.1rem; cursor: pointer;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -33,7 +47,6 @@
 </div>
 
 <style>
-    /* Scrollbar dizayni */
     #modal-messages-box::-webkit-scrollbar { width: 4px; }
     #modal-messages-box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 </style>
@@ -44,14 +57,13 @@
         const chatInput = document.getElementById("modal-chat-input");
         const messagesBox = document.getElementById("modal-messages-box");
 
-        // Ko'k yumaloq tugmani modalga bog'lash
+        // Pastdagi dumaloq Telegram tugmasini faollashtirish
         const floatChatBtn = document.querySelector('.fixed-bottom, [class*="fa-paper-plane"], .rounded-circle img, a[href*="chat"]');
         if (floatChatBtn) {
             floatChatBtn.setAttribute("data-bs-toggle", "modal");
             floatChatBtn.setAttribute("data-bs-target", "#telegramChatModal");
         }
 
-        // Xabarlarni API orqali yuklash
         function loadModalMessages() {
             fetch('/api/get-messages/?type=general')
                 .then(res => res.json())
@@ -72,9 +84,9 @@
                             msgDiv.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
 
                             msgDiv.innerHTML = `
-                                <div style="max-width: 85%; padding: 6px 10px; border-radius: 12px;
+                                <div style="max-width: 85%; padding: 6px 12px; border-radius: 12px;
                                             background-color: ${isMe ? '#2b5278' : '#1e2738'}; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
-                                    ${!isMe ? `<small style="color: #00f2fe; display: block; font-weight: bold; font-size: 0.75rem; margin-bottom: 1px;">@${msg.sender}</small>` : ''}
+                                    ${!isMe ? `<small style="color: #00f2fe; display: block; font-weight: bold; font-size: 0.75rem; margin-bottom: 2px;">@${msg.sender}</small>` : ''}
                                     <span style="font-size: 0.88rem; word-break: break-word;">${msg.text}</span>
                                     <small style="display: block; text-align: right; font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 2px;">${msg.time}</small>
                                 </div>
@@ -89,7 +101,6 @@
                 }).catch(err => console.log("Yuklashda xatolik"));
         }
 
-        // Xabar yuborish
         function sendModalMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -120,6 +131,6 @@
         }
 
         loadModalMessages();
-        setInterval(loadModalMessages, 3000); // Har 3 soniyada avto-yangilash
+        setInterval(loadModalMessages, 3000);
     });
 </script>
