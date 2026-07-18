@@ -1,130 +1,218 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid px-4" style="height: calc(100vh - 140px); min-height: 550px;">
-    <div class="row h-100 rounded-4 overflow-hidden shadow-lg" style="background-color: #161c2a; border: 1px solid rgba(0, 242, 254, 0.15);">
+<div class="container mt-5 position-relative">
 
-        <div class="col-md-4 d-flex flex-column p-0" style="background-color: #0f131f; border-right: 1px solid rgba(255, 255, 255, 0.05);">
+    <div class="position-absolute" style="top: -20px; left: 15px;">
+        <a href="{% url 'tools_home' %}" class="btn btn-outline-secondary px-3 py-2 rounded-pill fw-bold btn-sm shadow-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Panelga qaytish
+        </a>
+    </div>
 
-            <div class="p-3 border-bottom border-secondary border-opacity-25">
-                <h5 class="text-white mb-3 fw-bold" style="font-size: 1.1rem;">
-                    <i class="fa-solid fa-paper-plane text-info me-2"></i> SmartHub Messenger
-                </h5>
-                <form method="GET" class="position-relative">
-                    <input type="text" name="search" value="{{ search_query }}" class="form-control bg-dark border-0 text-white rounded-3 py-2 ps-5" placeholder="Foydalanuvchini qidirish..." style="font-size: 0.9rem;">
-                    <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 15px; top: 12px;"></i>
-                </form>
-            </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-10">
+            <div class="card shadow border-0" style="background-color: #121824; border-radius: 20px; height: 75vh; overflow: hidden; border: 1px solid rgba(0, 242, 254, 0.15);">
 
-            <div class="flex-grow-1 overflow-y-auto p-2" style="max-height: calc(100vh - 320px);">
-                <div class="d-flex flex-column gap-1">
-
-                    <a href="?chat_type=group" class="d-flex align-items-center text-decoration-none p-3 rounded-3 transition-all {% if not active_receiver %}bg-info bg-opacity-10 border-start border-3 border-info text-info fw-bold{% else %}text-white-50 hover-bg-dark{% endif %}">
-                        <div class="rounded-circle bg-warning bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px; min-width: 42px;">
-                            <i class="fa-solid fa-users text-warning" style="font-size: 1.1rem;"></i>
+                <div class="card-header d-flex align-items-center justify-content-between px-4 py-3" style="background-color: #1a2234; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-paper-plane fs-5"></i>
                         </div>
-                        <div class="flex-grow-1 text-truncate">
-                            <div class="text-white fw-bold" style="font-size: 0.95rem;">Umumiy Guruh Chati</div>
-                            <small class="text-muted" style="font-size: 0.8rem;">Hamma foydalanuvchilar shu yerda</small>
+                        <div>
+                            <h5 id="active-chat-title" class="text-white fw-bold m-0">Umumiy Chat</h5>
+                            <small class="text-success" id="chat-status-sub">Hamma shu yerda yozishadi</small>
                         </div>
-                    </a>
-
-                    {% for u in users %}
-                    <a href="?user_id={{ u.id }}" class="d-flex align-items-center text-decoration-none p-3 rounded-3 transition-all {% if active_receiver.id == u.id %}bg-info bg-opacity-10 border-start border-3 border-info text-info fw-bold{% else %}text-white-50 hover-bg-dark{% endif %}">
-                        <div class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center me-3 position-relative" style="width: 42px; height: 42px; min-width: 42px;">
-                            <i class="fa-solid fa-user text-white-50" style="font-size: 1.1rem;"></i>
-                            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle"></span>
-                        </div>
-                        <div class="flex-grow-1 text-truncate">
-                            <div class="text-white fw-bold" style="font-size: 0.95rem;">{{ u.username }}</div>
-                            <small class="text-muted" style="font-size: 0.8rem;">shaxsiy xabar yuborish</small>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8 d-flex flex-column p-0 bg-transparent">
-
-            <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary border-opacity-10" style="background-color: #0f131f;">
-                <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
-                        {% if active_receiver %}
-                            <i class="fa-solid fa-user text-info" style="font-size: 1.1rem;"></i>
-                        {% else %}
-                            <i class="fa-solid fa-users text-warning" style="font-size: 1.1rem;"></i>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <h6 class="m-0 text-white fw-bold" style="font-size: 0.95rem;">
-                            {% if active_receiver %}{{ active_receiver.username }}{% else %}Umumiy Guruh Chati{% endif %}
-                        </h6>
-                        <small class="text-success" style="font-size: 0.75rem;"><i class="fa-solid fa-circle me-1" style="font-size: 0.4rem;"></i> onlayn</small>
                     </div>
                 </div>
-            </div>
 
-            <div class="flex-grow-1 overflow-y-auto p-4 d-flex flex-column gap-3" style="background-color: #121622; max-height: calc(100vh - 300px);" id="chat-messages-box">
-                {% for message in messages_chat %}
-                    {% if message.sender == request.user %}
-                    <div class="d-flex justify-content-end align-items-end gap-2">
-                        <div class="text-white p-3 shadow-sm" style="max-width: 65%; background-color: #2b5278; border-radius: 16px 16px 0px 16px; font-size: 0.95rem;">
-                            {{ message.text|safe }}
-                            <div class="text-end text-white-50 mt-1" style="font-size: 0.7rem;">{{ message.created_at|date:"H:i" }}</div>
-                        </div>
+                <div class="row g-0 h-100" style="margin-top: -1px;">
+
+                    <div class="col-md-4 border-end" style="border-color: rgba(255,255,255,0.05) !important; background-color: #161f30; max-height: calc(75vh - 70px); overflow-y: auto;">
+                        <div class="list-group list-group-flush" id="users-list-group">
+                            <button onclick="switchChat('general', null, 'Umumiy Chat')" class="list-group-item list-group-item-action border-0 px-4 py-3 text-white active-chat-item" style="background-color: rgba(0, 242, 254, 0.1); border-left: 4px solid #00f2fe;">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">Umumiy Chat</div>
+                                        <small class="text-muted">Hamma ko'ra oladi</small>
+                                    </div>
+                                </div>
+                            </button>
+                            </div>
                     </div>
-                    {% else %}
-                    <div class="d-flex justify-content-start align-items-end gap-2">
-                        <div class="p-3 text-white shadow-sm border-start border-3 border-info" style="max-width: 65%; background-color: #192233; border-radius: 16px 16px 16px 0px; font-size: 0.95rem;">
-                            {% if not active_receiver %}
-                                <div class="text-info fw-bold mb-1" style="font-size: 0.8rem;">@{{ message.sender.username }}</div>
-                            {% endif %}
-                            {{ message.text|safe }}
-                            <div class="text-start text-muted mt-1" style="font-size: 0.7rem;">{{ message.created_at|date:"H:i" }}</div>
+
+                    # O'ng panel: Xabarlar maydoni
+                    <div class="col-md-8 d-flex flex-column justify-content-between" style="background-color: #121824; max-height: calc(75vh - 70px);">
+
+                        <div id="chat-messages-box" class="p-4 flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                            <div class="text-center text-muted my-auto">Yuklanmoqda...</div>
                         </div>
+
+                        <div class="p-3" style="background-color: #161f30; border-top: 1px solid rgba(255,255,255,0.05);">
+                            <form id="chat-message-form" onsubmit="sendMessage(event)" class="d-flex gap-2">
+                                <input type="text" id="chat-input-field" class="form-control border-0 text-white px-4 py-3" placeholder="Xabar yozing..." style="background-color: #1e293b; border-radius: 30px;" autocomplete="off">
+                                <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center shadow" style="border-radius: 50%; width: 50px; height: 50px;">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
-                    {% endif %}
-                {% empty %}
-                <div class="text-center text-muted my-auto">
-                    <i class="fa-regular fa-message d-block mb-2" style="font-size: 2rem;"></i>
-                    Suhbatni boshlash uchun birinchi xabarni yozing!
+
                 </div>
-                {% endfor %}
-            </div>
 
-            <div class="p-3 border-top border-secondary border-opacity-10" style="background-color: #0f131f;">
-                <form method="POST" class="d-flex align-items-center gap-2 m-0">
-                    {% csrf_token %}
-                    <input type="text" name="message" class="form-control form-control-lg bg-dark text-white border-0 py-3 shadow-none custom-input"
-                           placeholder="Xabarni shu yerga yozing..." autocomplete="off" required style="border-radius: 12px; font-size: 0.95rem; background-color: #1a2235 !important; color: #fff !important;">
-                    <button type="submit" class="btn btn-info p-3 d-flex align-items-center justify-content-center shadow-sm hover-scale" style="border-radius: 12px; width: 50px; height: 50px;">
-                        <i class="fa-solid fa-paper-plane text-dark" style="font-size: 1.1rem;"></i>
-                    </button>
-                </form>
             </div>
-
         </div>
     </div>
 </div>
 
-<style>
-    .hover-bg-dark:hover { background-color: rgba(255, 255, 255, 0.03) !important; color: #fff !important; }
-    .transition-all { transition: all 0.2s ease-in-out; }
-    .custom-input:focus { box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.2) !important; background-color: #1d263b !important; }
-    .hover-scale:hover { transform: scale(1.03); transition: 0.2s; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+<script>
+    let currentChatType = 'general';
+    let currentActiveUserId = null;
+    const currentUsername = "{{ request.user.username }}";
 
-    /* 📍 NAVBARDAGI "HA" AYLANASINI YASHIRISH UCHUN QO'SHILDI */
-    .bg-info.rounded-circle.d-flex.align-items-center.justify-content-center.me-2[style*="width: 40px"],
-    .avatar, .user-avatar, [class*="avatar"] {
-        display: none !important;
+    // Sahifa yuklanganda ishga tushadigan qism
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUsers();
+        loadMessages();
+        // Har 3 soniyada yangi xabarlarni avtomatik tekshirib turish (Polling)
+        setInterval(loadMessages, 3000);
+    });
+
+    // Foydalanuvchilar ro'yxatini yuklash
+    function loadUsers() {
+        fetch("{% url 'get_chat_users' %}")
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('users-list-group');
+                data.users.forEach(user => {
+                    const btn = document.createElement('button');
+                    btn.className = "list-group-item list-group-item-action border-0 px-4 py-3 text-white-50 bg-transparent user-chat-btn-item";
+                    btn.style.transition = "all 0.2s ease";
+                    btn.onclick = () => switchChat('private', user.id, `@${user.username}`);
+                    btn.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="bg-dark border border-secondary rounded-circle d-flex align-items-center justify-content-center text-info fw-bold me-3" style="width: 40px; height: 40px;">
+                                ${user.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-white">${user.username}</div>
+                                <small class="text-muted">Shaxsiy xabar</small>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(btn);
+                });
+            });
+    }
+
+    // Xabarlarni serverdan tortib kelish
+    function loadMessages() {
+        let url = `{% url 'get_messages' %}?type=${currentChatType}`;
+        if (currentChatType === 'private') {
+            url += `&user_id=${currentActiveUserId}`;
+        }
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const box = document.getElementById('chat-messages-box');
+                const wasAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
+
+                if(data.messages.length === 0) {
+                    box.innerHTML = `<div class="text-center text-muted my-auto">Bu yerda hozircha xabarlar yo'q. Birinchi bo'lib yozing!</div>`;
+                    return;
+                }
+
+                box.innerHTML = data.messages.map(msg => {
+                    const isMe = msg.sender === currentUsername;
+                    return `
+                        <div class="d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'}">
+                            <div class="small text-muted mb-1 px-2">${isMe ? 'Siz' : '@' + msg.sender}</div>
+                            <div class="p-3 rounded-3 shadow-sm text-white" style="max-width: 75%; word-break: break-word;
+                                 background-color: ${isMe ? '#0d6efd' : '#212e46'};
+                                 border-radius: ${isMe ? '15px 15px 0px 15px' : '15px 15px 15px 0px'} !important;">
+                                ${msg.text}
+                                <div class="text-end text-white-50 ms-3 d-inline-block" style="font-size: 10px; float: right; margin-top: 5px;">${msg.time}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (wasAtBottom) {
+                    box.scrollTop = box.scrollHeight;
+                }
+            });
+    }
+
+    // Chatlar orasida almashish (Umumiy <-> Shaxsiy)
+    function switchChat(type, userId, title) {
+        currentChatType = type;
+        currentActiveUserId = userId;
+
+        document.getElementById('active-chat-title').innerText = title;
+        document.getElementById('chat-status-sub').innerText = type === 'general' ? 'Hamma shu yerda yozishadi' : 'Xavfsiz shaxsiy yozishmalar';
+
+        // Aktivlik vizual borderini to'g'rilash
+        document.querySelectorAll('.list-group-item').forEach(el => {
+            el.style.backgroundColor = 'transparent';
+            el.style.borderLeft = 'none';
+        });
+
+        const activeBtn = event.currentTarget;
+        activeBtn.style.backgroundColor = 'rgba(0, 242, 254, 0.1)';
+        activeBtn.style.borderLeft = '4px solid #00f2fe';
+
+        document.getElementById('chat-messages-box').innerHTML = `<div class="text-center text-muted my-auto">Yuklanmoqda...</div>`;
+        loadMessages();
+    }
+
+    // Xabar yuborish
+    function sendMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('chat-input-field');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const bodyData = { type: currentChatType, text: text };
+        if (currentChatType === 'private') {
+            bodyData.user_id = currentActiveUserId;
+        }
+
+        fetch("{% url 'send_message' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(bodyData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                input.value = '';
+                loadMessages();
+                setTimeout(() => {
+                    const box = document.getElementById('chat-messages-box');
+                    box.scrollTop = box.scrollHeight;
+                }, 100);
+            }
+        });
+    }
+</script>
+
+<style>
+    #chat-messages-box::-webkit-scrollbar, .col-md-4::-webkit-scrollbar {
+        width: 6px;
+    }
+    #chat-messages-box::-webkit-scrollbar-thumb, .col-md-4::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+    .user-chat-btn-item:hover {
+        background-color: rgba(255,255,255,0.02) !important;
     }
 </style>
-
-<script>
-    const box = document.getElementById('chat-messages-box');
-    if (box) { box.scrollTop = box.scrollHeight; }
-</script>
 {% endblock %}

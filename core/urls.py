@@ -18,6 +18,7 @@ urlpatterns = [
     path('race-arena/', views.race_arena, name='race_arena'),
     path('races-list/', views.races_list, name='races_list'),
     path('api/save-race/', views.save_race_result, name='save_race_result'),
+    path('save-race-result/', views.save_race_result, name='save_race_result'),
 
     # Tizim foydalanuvchilari va Chat yo'llari
     path('system-users/', views.user_activity_list, name='user_activity_list'),
