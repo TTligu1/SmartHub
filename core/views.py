@@ -275,7 +275,7 @@ TEXT_POOL = [
     "Dasturlashni o'rganish sabr va tinimsiz mehnat talab qiladi. Har kuni ozgina bo'lsa ham kod yozing.",
     "Python juda sodda va tushunarli dasturlash tili bo'lib, u sun'iy intellekt sohasida keng qo'llaniladi.",
     "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir.",
-    "JavaScript bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
+    "JavaScript bu veb-sahifalartan jonlantirish, ularga dinamik imkoniyatlar qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
     "Python bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
 ]
 
@@ -286,14 +286,25 @@ def race_arena(request):
     return render(request, 'core/race_arena.html', {'text_to_type': random_text})
 
 
+# 📍 MUKAMMAL, 100% DINAMIK YANGILANUVCHI PESHQADAMLAR JADVALI LOGIKASI
 @login_required(login_url='login')
 def races_list(request):
-    top_results = TypingResult.objects.values('user').annotate(max_wpm=Max('wpm')).order_by('-max_wpm')[:10]
+    # Har bir foydalanuvchining bazadagi ENG YUQORI WPM qiymatini aniqlaymiz (xato testlarni cheklash uchun aniqlik 50% dan baland bo'lishi kerak)
+    top_results = TypingResult.objects.filter(accuracy__gte=50).values('user').annotate(max_wpm=Max('wpm')).order_by(
+        '-max_wpm')[:10]
+
     leaderboard = []
     for entry in top_results:
-        result = TypingResult.objects.filter(user_id=entry['user'], wpm=entry['max_wpm']).first()
+        # Aynan o'sha foydalanuvchining eng yuqori WPM ga ega bo'lgan eng so'nggi va eng mos satrini yuklaymiz
+        result = TypingResult.objects.filter(
+            user_id=entry['user'],
+            wpm=entry['max_wpm'],
+            accuracy__gte=50
+        ).select_related('user').order_by('-id').first()
+
         if result:
             leaderboard.append(result)
+
     return render(request, 'core/races_list.html', {'leaderboard': leaderboard})
 
 
@@ -309,8 +320,8 @@ def save_race_result(request):
             if new_wpm <= 0:
                 return JsonResponse({'status': 'ignored', 'is_new_record': False, 'best_wpm': 0})
 
-            # Bazadagi haqiqiy shaxsiy maksimal rekordni topamiz
-            highest_wpm_data = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))
+            # Bazadagi haqiqiy shaxsiy maksimal rekordni topamiz (faqat real natijalar tekshiriladi)
+            highest_wpm_data = TypingResult.objects.filter(user=request.user, accuracy__gte=50).aggregate(Max('wpm'))
             highest_wpm = highest_wpm_data['wpm__max']
 
             is_new_record = False
@@ -325,10 +336,9 @@ def save_race_result(request):
                 is_new_record = False
                 best_to_return = highest_wpm
 
-            # Natijani bazaga saqlaymiz
+            # Natijani bazaga qat'iy saqlaymiz
             TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
 
-            # JavaScript qat'iy boolean sifatida qabul qilishi uchun bool() bilan o'rab qaytaramiz
             return JsonResponse({
                 'status': 'success',
                 'is_new_record': bool(is_new_record),
