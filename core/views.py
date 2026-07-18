@@ -8,14 +8,14 @@ from barcode.writer import ImageWriter
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
-from django.db.models import Max
+from django.db.models import Max, Q  # 📍 CHAT QIDIRUVI UCHUN 'Q' IMPORT QILINDI
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from PIL import Image, ImageOps
 
-# HUDUDIY MODELLAR IMPORTI (Barcha modellar bir joyda xatoliksiz birlashtirildi)
-from .models import ChatSession, ChatMessage, TypingResult, UserProfile
+# HUDUDIY MODELLAR IMPORTI (Modellar aralashib ketmasligi uchun TelegramChatMessage ham qo'shildi)
+from .models import ChatSession, ChatMessage, TelegramChatMessage, TypingResult, UserProfile
 
 
 # ==========================================
@@ -331,46 +331,71 @@ def user_activity_list(request):
     return render(request, 'core/user_list.html', {'all_users': all_users})
 
 
+# =========================================================================
+# 📍 9. MUKAMMAL TELEGRAM CHAT TIZIMI API LOGIKASI (YANGI MODELGA MOSLANDI)
+# =========================================================================
+
+@login_required
+def get_chat_users(request):
+    """ O'zidan tashqari tizimda bor bo'lgan hamma foydalanuvchilar ro'yxatini yuklash """
+    users = User.objects.exclude(id=request.user.id).values('id', 'username')
+    return JsonResponse({'users': list(users)})
+
+
+@login_required
+def get_messages(request):
+    """ Umumiy yoki Shaxsiy Telegram chat xabarlarini modelga mos holda yuklash """
+    chat_type = request.GET.get('type')  # 'general' yoki 'private'
+
+    if chat_type == 'general':
+        # Receiver'i bo'lmagan xabarlar TelegramChatMessage ichidagi Umumiy chat hisoblanadi
+        messages = TelegramChatMessage.objects.filter(receiver__isnull=True).order_by('timestamp')
+    else:
+        user_id = request.GET.get('user_id')
+        # Shaxsiy suhbatni filtrlash
+        messages = TelegramChatMessage.objects.filter(
+            (Q(sender=request.user, receiver_id=user_id)) |
+            (Q(sender_id=user_id, receiver=request.user))
+        ).order_by('timestamp')
+
+    data = [{
+        'sender': msg.sender.username,
+        'sender_id': msg.sender.id,
+        'text': msg.message_text,
+        'time': msg.timestamp.strftime('%H:%M')
+    } for msg in messages]
+
+    return JsonResponse({'messages': data})
+
+
+@login_required
+def send_message(request):
+    """ Yangi shaxsiy yoki umumiy telegram xabarini saqlash """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            chat_type = data.get('type')
+            text = data.get('text')
+
+            if not text:
+                return JsonResponse({'status': 'error', 'message': 'Bo\'sh xabar yuborib bo\'lmaydi.'})
+
+            # Bu yerda yangi TelegramChatMessage modelidan foydalaniladi
+            msg = TelegramChatMessage(sender=request.user, message_text=text)
+
+            if chat_type == 'private':
+                msg.receiver_id = data.get('user_id')
+
+            msg.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Faqat POST so\'rovlar ruxsat etilgan.'}, status=400)
+
+
+
 @login_required(login_url='login')
 def user_chat_room(request):
-    search_query = request.GET.get('search', '').strip()
-    receiver_id = request.GET.get('user_id')  # Kim bilan yozishilayotgani
-
-    # O'zimizdan tashqari barcha foydalanuvchilar
-    users = User.objects.exclude(id=request.user.id)
-    if search_query:
-        users = users.filter(username__icontains=search_query)
-
-    active_receiver = None
-    messages_chat = []
-
-    if receiver_id:
-        active_receiver = User.objects.filter(id=receiver_id).first()
-        if active_receiver:
-            # Ikki foydalanuvchi o'rtasidagi shaxsiy xabarlar (Sender yoki Receiver bo'lgan holatlar)
-            messages_chat = UserMessage.objects.filter(
-                (models.Q(sender=request.user) & models.Q(receiver=active_receiver)) |
-                (models.Q(sender=active_receiver) & models.Q(receiver=request.user))
-            )
-    else:
-        # Agar hech kim tanlanmagan bo'lsa, Umumiy Guruh Chati xabarlarini ko'rsatish (receiver=None)
-        messages_chat = UserMessage.objects.filter(receiver__isnull=True)
-
-    if request.method == 'POST':
-        message_text = request.POST.get('message', '').strip()
-        if message_text:
-            UserMessage.objects.create(
-                sender=request.user,
-                receiver=active_receiver,  # Tanlangan odam yoki Umumiy guruh (None)
-                text=message_text
-            )
-            if active_receiver:
-                return redirect(f'/chat/?user_id={active_receiver.id}')
-            return redirect('/chat/')
-
-    return render(request, 'core/user_chat.html', {
-        'users': users,
-        'active_receiver': active_receiver,
-        'messages_chat': messages_chat,
-        'search_query': search_query
-    })
+    """ Telegram-style chat sahifasini ochib beruvchi asosiy oyna """
+    return render(request, 'core/user_chat_room.html')

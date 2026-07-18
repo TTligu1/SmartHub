@@ -25,7 +25,7 @@
             color: #00f2fe !important;
         }
 
-        /* 📍1-QISM: TELEGRAM USLUBIDAGI DUMALOCH QILINGAN AVATAR STILLARI (CSS) */
+        /* 📍 NAVBAR ICHIDAGI TELEGRAM USLUBIDAGI DUMALOCH AVATAR */
         .profile-avatar-circle {
             width: 38px;
             height: 38px;
@@ -44,6 +44,112 @@
         .profile-avatar-circle:hover {
             transform: scale(1.05);
         }
+
+        /* 🎨 YANGA INTEGRATSIYA: TELEGRAM ADVANCED CHAT INTERFEYSI STILLARI */
+        .tg-widget-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 99999 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* 🎯 TEPADA TURING DEYILGAN TELEGRAM IKONKALI DUMALOQ TUGMA */
+        .tg-toggle-btn {
+            width: 60px;
+            height: 60px;
+            background-color: #24A1DE;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(36, 161, 222, 0.4);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tg-toggle-btn:hover { transform: scale(1.06); }
+
+        /* 💻 BOSGANDA OCHILADIGAN TELEGRAM INTERFEYSLI OYNA */
+        .tg-chat-window {
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            width: 680px;
+            height: 500px;
+            background-color: #17212b;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            border: 1px solid #24303f;
+            display: none; /* Dastlab yopiq */
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .tg-chat-window.show { display: flex; }
+        .tg-chat-header {
+            background-color: #24303f;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2a36;
+        }
+        .tg-close-btn { background: none; border: none; color: #7f91a4; font-size: 1.6rem; cursor: pointer; }
+        .tg-close-btn:hover { color: #fff; }
+
+        .tg-chat-main { display: flex; flex-grow: 1; height: calc(100% - 49px); }
+
+        /* 📂 CHAP PANEL: Foydalanuvchilar va Guruhlar Ro'yxati */
+        .tg-sidebar {
+            width: 240px;
+            background-color: #17212b;
+            border-right: 1px solid #10171e;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .tg-users-list { display: flex; flex-direction: column; }
+        .tg-tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #10171e;
+            transition: background 0.2s;
+        }
+        .tg-tab:hover, .tg-tab.active { background-color: #202b36; }
+        .tg-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.85rem;
+            background-color: #2b5278;
+        }
+        .tg-avatar.bg-purple { background-color: #6c5ce7; }
+        .tg-tab-info { display: flex; flex-direction: column; overflow: hidden; }
+        .tg-tab-name { color: #fff; font-size: 0.85rem; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        /* 💬 O'NG PANEL: Yozishmalar oynasi */
+        .tg-body { flex-grow: 1; display: flex; flex-direction: column; background-color: #0e1621; }
+        .tg-body-header { background-color: #17212b; padding: 12px 16px; color: #fff; font-size: 0.9rem; font-weight: bold; border-bottom: 1px solid #10171e; }
+        .tg-messages-area { flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .tg-msg { max-width: 75%; padding: 7px 11px; border-radius: 8px; font-size: 0.85rem; color: #fff; line-height: 1.4; position: relative; }
+        .tg-msg.inc { background-color: #182533; align-self: flex-start; border-bottom-left-radius: 3px; }
+        .tg-msg.out { background-color: #2b5278; align-self: flex-end; border-bottom-right-radius: 3px; margin-left: auto; }
+        .tg-msg-user { font-size: 0.75rem; color: #5288c1; font-weight: bold; margin-bottom: 2px; }
+        .tg-msg-time { font-size: 0.65rem; color: #7f91a4; text-align: right; margin-top: 3px; }
+
+        .tg-footer { padding: 10px 14px; background-color: #17212b; display: flex; gap: 10px; align-items: center; }
+        .tg-footer input { flex-grow: 1; background-color: #111922; border: 1px solid #202b36; padding: 9px 14px; border-radius: 20px; color: white; font-size: 0.85rem; outline: none; }
+        .tg-footer button { background: none; border: none; color: #5288c1; font-size: 1.2rem; cursor: pointer; }
+        .tg-footer button:hover { color: #24A1DE; }
     </style>
 </head>
 <body>
@@ -70,7 +176,6 @@
 
                 {% if user.is_authenticated %}
                 <div class="d-flex align-items-center gap-3 ms-auto">
-
                     <div class="d-flex align-items-center gap-2" id="profileToggleTrigger" style="cursor: pointer;">
                         <div class="profile-avatar-circle">
                             {{ user.username|slice:":2"|upper }}
@@ -95,178 +200,198 @@
         {% endblock %}
     </div>
 
-    <div class="widget-chat-container">
-        <button class="widget-chat-toggle-btn" id="widgetChatToggle">
-            <i class="fa-solid fa-comments"></i>
-            <span class="widget-badge">1</span>
+    <div class="tg-widget-container">
+        <button class="tg-toggle-btn" id="widgetChatToggle">
+            <i class="fa-brands fa-telegram"></i>
         </button>
 
-        <div class="widget-chat-box" id="widgetChatBox">
-            <div class="widget-chat-header">
+        <div class="tg-chat-window" id="widgetChatBox">
+            <div class="tg-chat-header">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="widget-avatar">AH</div>
-                    <div>
-                        <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Abdujalil Habibullayev</h6>
-                        <small class="text-success" style="font-size: 0.7rem;">• onlayn</small>
+                    <i class="fa-brands fa-telegram text-info fs-4"></i>
+                    <h6 class="m-0 fw-bold text-white">SmartHub Telegram Chat</h6>
+                </div>
+                <button class="tg-close-btn" id="widgetChatClose">&times;</button>
+            </div>
+
+            <div class="tg-chat-main">
+                <div class="tg-sidebar">
+                    <div class="tg-tab active" id="tabGeneral" onclick="switchChat('general', null, 'Umumiy Chat')">
+                        <div class="tg-avatar bg-purple"><i class="fa-solid fa-users"></i></div>
+                        <div class="tg-tab-info">
+                            <span class="tg-tab-name">Umumiy Chat</span>
+                            <small class="text-muted" style="font-size:0.7rem;">Hamma yozishadi</small>
+                        </div>
+                    </div>
+                    <div class="tg-users-list" id="tgUsersList"></div>
+                </div>
+
+                <div class="tg-body">
+                    <div class="tg-body-header" id="activeChatTitle">Umumiy Chat</div>
+                    <div class="tg-messages-area" id="tgMsgArea">
+                        </div>
+                    <div class="tg-footer">
+                        <input type="text" placeholder="Xabar yozing..." id="tgInput">
+                        <button id="tgSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
-                <button class="widget-close-btn" id="widgetChatClose">&times;</button>
-            </div>
-
-            <div class="widget-chat-body">
-                <div class="widget-msg incoming">
-                    <div class="widget-msg-text">telegramga kiring</div>
-                    <div class="widget-msg-time">11:20</div>
-                </div>
-                <div class="widget-msg outgoing">
-                    <div class="widget-msg-text">hozir, loyihani tugatyapman</div>
-                    <div class="widget-msg-time">11:21</div>
-                </div>
-            </div>
-
-            <div class="widget-chat-footer">
-                <input type="text" placeholder="Xabar yozing..." id="widgetChatInput">
-                <button id="widgetSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <style>
-        .widget-chat-container {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 99999 !important;
-        }
-        .widget-chat-toggle-btn {
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(135deg, #00f2fe, #4facfe);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 1.35rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
-            position: relative;
-            transition: transform 0.2s;
-        }
-        .widget-chat-toggle-btn:hover { transform: scale(1.05); }
-        .widget-badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            background-color: #ff4757;
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 50%;
-            font-weight: bold;
-        }
-        .widget-chat-box {
-            position: absolute;
-            bottom: 70px;
-            right: 0;
-            width: 340px;
-            height: 450px;
-            background-color: #161c2a;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.08);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .widget-chat-box.show { display: flex; }
-        .widget-chat-header {
-            background-color: #0f131f;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .widget-avatar {
-            width: 35px;
-            height: 35px;
-            background-color: #2b5278;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 0.8rem;
-        }
-        .widget-close-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.3rem;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-        .widget-chat-body {
-            flex-grow: 1;
-            padding: 12px;
-            overflow-y: auto;
-            background-color: #0f131f;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .widget-msg {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 0.82rem;
-            color: white;
-        }
-        .widget-msg.incoming { background-color: #161c2a; align-self: flex-start; }
-        .widget-msg.outgoing { background-color: #2b5278; align-self: flex-end; margin-left: auto; }
-        .widget-msg-time { font-size: 0.6rem; color: rgba(255,255,255,0.3); text-align: right; margin-top: 2px; }
-        .widget-chat-footer { padding: 10px; background-color: #161c2a; display: flex; gap: 8px; }
-        .widget-chat-footer input {
-            flex-grow: 1;
-            background-color: #0f131f;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 20px;
-            color: white;
-            font-size: 0.82rem;
-            outline: none;
-        }
-        .widget-chat-footer button { background: none; border: none; color: #00f2fe; cursor: pointer; }
-    </style>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        let currentChatType = 'general';
+        let currentTargetUserId = null;
+
         document.addEventListener("DOMContentLoaded", function() {
             const toggleBtn = document.getElementById("widgetChatToggle");
             const closeBtn = document.getElementById("widgetChatClose");
             const chatBox = document.getElementById("widgetChatBox");
             const profileTrigger = document.getElementById("profileToggleTrigger");
+            const sendBtn = document.getElementById("tgSendBtn");
+            const inputField = document.getElementById("tgInput");
 
-            // Burchakdagi chat tugmasi bosilganda ochish/yopish
+            // Oynani ochish va yopish boshqaruvi
             if(toggleBtn && chatBox) {
                 toggleBtn.addEventListener("click", function() {
                     chatBox.classList.toggle("show");
+                    if(chatBox.classList.contains("show")) {
+                        loadUsers();
+                        loadMessages();
+                    }
                 });
-                if(closeBtn) {
-                    closeBtn.addEventListener("click", function() {
-                        chatBox.classList.remove("show");
-                    });
-                }
             }
-
-            // Telegram avatar (profil) bosilganda ham shu chat oynasi ochilishi uchun
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function() {
+                    chatBox.classList.remove("show");
+                });
+            }
             if (profileTrigger && chatBox) {
                 profileTrigger.addEventListener("click", function() {
                     chatBox.classList.toggle("show");
+                    if(chatBox.classList.contains("show")) {
+                        loadUsers();
+                        loadMessages();
+                    }
                 });
             }
+
+            // Xabar jo'natish hodisalari
+            if(sendBtn) sendBtn.addEventListener("click", sendMessage);
+            if(inputField) {
+                inputField.addEventListener("keypress", function(e) {
+                    if(e.key === 'Enter') sendMessage();
+                });
+            }
+
+            // Avtomatik yangilash (Har 4 sekundda yangi xabarlarni tortadi)
+            setInterval(() => {
+                if(chatBox && chatBox.classList.contains("show")) {
+                    loadMessages();
+                }
+            }, 4000);
         });
+
+        // 📂 Bazadagi foydalanuvchilar ro'yxatini chap panelga chiqarish
+        function loadUsers() {
+            fetch('/chat/users/')
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById("tgUsersList");
+                if(!listContainer) return;
+                listContainer.innerHTML = "";
+                data.users.forEach(u => {
+                    const initials = u.username.slice(0,2).toUpperCase();
+                    listContainer.innerHTML += `
+                        <div class="tg-tab" id="user-tab-${u.id}" onclick="switchChat('private', ${u.id}, '@${u.username}')">
+                            <div class="tg-avatar">${initials}</div>
+                            <div class="tg-tab-info">
+                                <span class="tg-tab-name">@${u.username}</span>
+                                <small class="text-muted" style="font-size:0.65rem;">Yozishish uchun ezing</small>
+                            </div>
+                        </div>
+                    `;
+                });
+            }).catch(err => console.log("Foydalanuvchilarni yuklashda xato yoki API yo'li o'rnatilmagan."));
+        }
+
+        // 🔄 Umumiy va Shaxsiy chatlar o'rtasida o'tish logikasi
+        function switchChat(type, userId, title) {
+            currentChatType = type;
+            currentTargetUserId = userId;
+            document.getElementById("activeChatTitle").innerText = title;
+
+            document.querySelectorAll('.tg-tab').forEach(t => t.classList.remove('active'));
+            if(type === 'general') {
+                document.getElementById('tabGeneral').classList.add('active');
+            } else if(userId) {
+                const activeTab = document.getElementById(`user-tab-${userId}`);
+                if(activeTab) activeTab.classList.add('active');
+            }
+
+            loadMessages();
+        }
+
+        // 📥 Tanlangan chatga tegishli xabarlarni backenddan yuklash
+        function loadMessages() {
+            let url = `/chat/messages/?type=${currentChatType}`;
+            if(currentChatType === 'private') url += `&user_id=${currentTargetUserId}`;
+
+            fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const area = document.getElementById("tgMsgArea");
+                if(!area) return;
+                area.innerHTML = "";
+                data.messages.forEach(m => {
+                    const isOut = m.sender === "{{ user.username }}";
+                    area.innerHTML += `
+                        <div class="tg-msg ${isOut ? 'out' : 'inc'}">
+                            ${currentChatType === 'general' && !isOut ? `<div class="tg-msg-user">@${m.sender}</div>` : ''}
+                            <div class="tg-msg-content">${m.text}</div>
+                            <div class="tg-msg-time">${m.time}</div>
+                        </div>
+                    `;
+                });
+                area.scrollTop = area.scrollHeight;
+            }).catch(err => {
+                // API hali ulanmagan bo'lsa frontdagi statik vizual dizayn buzilmasligi uchun namuna
+                const area = document.getElementById("tgMsgArea");
+                if(area && area.children.length === 0) {
+                    area.innerHTML = `<div class="text-center text-muted small mt-4">API yo'llari (views.py) tekshirilmoqda...</div>`;
+                }
+            });
+        }
+
+        // 📤 Xabarni serverga uzatish
+        function sendMessage() {
+            const input = document.getElementById("tgInput");
+            if(!input || !input.value.trim()) return;
+
+            const payload = {
+                type: currentChatType,
+                text: input.value,
+                user_id: currentTargetUserId
+            };
+
+            fetch('/chat/send/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    input.value = "";
+                    loadMessages();
+                }
+            });
+        }
     </script>
 </body>
 </html>
