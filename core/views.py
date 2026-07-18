@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from PIL import Image, ImageOps
 
-# HUDUDIY MODELLAR IMPORTI (Modellar aralashib ketmasligi uchun TelegramChatMessage ham qo'shildi)
+# HUDUDIY MODELLAR IMPORTI
 from .models import ChatSession, ChatMessage, TelegramChatMessage, TypingResult, UserProfile
 
 
@@ -90,12 +90,10 @@ def barcode_generator(request):
     })
 
 
-# 5. AI Chatbot (LIMIT VA PREMIUM MANTIQI TO'LIQ INTEGRATSIYA QILINGAN)
+# 5. AI Chatbot
 @login_required(login_url='login')
 def ai_chat(request):
     user = request.user
-
-    # Foydalanuvchi profilini olamiz (yoki yaratamiz)
     profile, created = UserProfile.objects.get_or_create(user=user)
 
     sessions = ChatSession.objects.filter(user=user)
@@ -115,11 +113,9 @@ def ai_chat(request):
                 text="Salom! Men SmartHub AI yordamchisiman. Bugun sizga qanday yordam bera olaman? 🧠"
             )
 
-    # Xabarlar sonini hisoblaymiz
     user_messages_count = active_session.messages.filter(sender="user").count()
     CHAT_LIMIT = 5
 
-    # Premium foydalanuvchilar cheklovdan ozod qilinadi
     if profile.is_premium:
         limit_reached = False
     else:
@@ -155,7 +151,6 @@ def ai_chat(request):
                 active_session.title = truncated_title
                 active_session.save()
 
-            # Sun'iy aqlli javoblar mantiqi
             msg_lower = user_message.lower()
             if "salom" in msg_lower or "assalom" in msg_lower:
                 ai_response = random.choice([
@@ -280,7 +275,7 @@ TEXT_POOL = [
     "Dasturlashni o'rganish sabr va tinimsiz mehnat talab qiladi. Har kuni ozgina bo'lsa ham kod yozing.",
     "Python juda sodda va tushunarli dasturlash tili bo'lib, u sun'iy intellekt sohasida keng qo'llaniladi.",
     "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir.",
-    "JavaScript — bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar (masalan: tugmalarni bosganda animatsiyalar chiqishi, sahifani yangilamasdan ma'lumotlarni yuklash) qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
+    "JavaScript — bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
     "Python – bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
 ]
 
@@ -302,6 +297,7 @@ def races_list(request):
     return render(request, 'core/races_list.html', {'leaderboard': leaderboard})
 
 
+# 📍 REKORD TAQQOSLASH LOGIKASI BILAN YANGILANGAN FUNKSIYA
 @login_required(login_url='login')
 def save_race_result(request):
     if request.method == "POST":
@@ -309,13 +305,30 @@ def save_race_result(request):
             data = json.loads(request.body)
             new_wpm = int(data.get('wpm', 0))
             new_accuracy = int(data.get('accuracy', 0))
+
             if new_wpm <= 0:
                 return JsonResponse({'status': 'ignored'})
+
+            # Foydalanuvchining shu vaqtgacha bo'lgan eng yuqori WPM rekordini topamiz
             highest_wpm = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))['wpm__max']
+
+            is_new_record = False
+            # Agar oldin rekordi bo'lmasa yoki yangi wpm eski rekorddan katta bo'lsa
             if highest_wpm is None or new_wpm > highest_wpm:
+                is_new_record = True
+                # Yangi rekordni bazaga yozamiz
                 TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
-                return JsonResponse({'status': 'success'})
-            return JsonResponse({'status': 'ignored'})
+                best_to_return = new_wpm
+            else:
+                # Agar rekord yangilanmagan bo'lsa ham oddiy urinish sifatida saqlashni xohlasangiz:
+                TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
+                best_to_return = highest_wpm
+
+            return JsonResponse({
+                'status': 'success',
+                'is_new_record': is_new_record,
+                'best_wpm': best_to_return
+            })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error'}, status=400)
@@ -332,27 +345,23 @@ def user_activity_list(request):
 
 
 # =========================================================================
-# 📍 9. MUKAMMAL TELEGRAM CHAT TIZIMI API LOGIKASI (YANGI MODELGA MOSLANDI)
+# 📍 9. MUKAMMAL TELEGRAM CHAT TIZIMI API LOGIKASI
 # =========================================================================
 
 @login_required
 def get_chat_users(request):
-    """ O'zidan tashqari tizimda bor bo'lgan hamma foydalanuvchilar ro'yxatini yuklash """
     users = User.objects.exclude(id=request.user.id).values('id', 'username')
     return JsonResponse({'users': list(users)})
 
 
 @login_required
 def get_messages(request):
-    """ Umumiy yoki Shaxsiy Telegram chat xabarlarini modelga mos holda yuklash """
-    chat_type = request.GET.get('type')  # 'general' yoki 'private'
+    chat_type = request.GET.get('type')
 
     if chat_type == 'general':
-        # Receiver'i bo'lmagan xabarlar TelegramChatMessage ichidagi Umumiy chat hisoblanadi
         messages = TelegramChatMessage.objects.filter(receiver__isnull=True).order_by('timestamp')
     else:
         user_id = request.GET.get('user_id')
-        # Shaxsiy suhbatni filtrlash
         messages = TelegramChatMessage.objects.filter(
             (Q(sender=request.user, receiver_id=user_id)) |
             (Q(sender_id=user_id, receiver=request.user))
@@ -370,7 +379,6 @@ def get_messages(request):
 
 @login_required
 def send_message(request):
-    """ Yangi shaxsiy yoki umumiy telegram xabarini saqlash """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -380,7 +388,6 @@ def send_message(request):
             if not text:
                 return JsonResponse({'status': 'error', 'message': 'Bo\'sh xabar yuborib bo\'lmaydi.'})
 
-            # Bu yerda yangi TelegramChatMessage modelidan foydalaniladi
             msg = TelegramChatMessage(sender=request.user, message_text=text)
 
             if chat_type == 'private':
@@ -394,8 +401,47 @@ def send_message(request):
     return JsonResponse({'status': 'error', 'message': 'Faqat POST so\'rovlar ruxsat etilgan.'}, status=400)
 
 
-
 @login_required(login_url='login')
 def user_chat_room(request):
-    """ Telegram-style chat sahifasini ochib beruvchi asosiy oyna """
     return render(request, 'core/user_chat_room.html')
+
+
+# 📍 MUTLAQ TO'G'RI REKORD TAQQOSLASH LOGIKASI
+@login_required(login_url='login')
+def save_race_result(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            new_wpm = int(data.get('wpm', 0))
+            new_accuracy = int(data.get('accuracy', 0))
+
+            if new_wpm <= 0:
+                return JsonResponse({'status': 'ignored'})
+
+            # 1. Foydalanuvchining shu paytgacha bo'lgan ENG YAXSHI rekordini olamiz
+            highest_wpm_data = TypingResult.objects.filter(user=request.user).aggregate(Max('wpm'))
+            highest_wpm = highest_wpm_data['wpm__max']
+
+            # 2. Yangi natija rekorddan kattami yoki birinchi o'yinimi?
+            is_new_record = False
+            if highest_wpm is None:
+                is_new_record = True
+                best_to_return = new_wpm
+            elif new_wpm > highest_wpm:
+                is_new_record = True
+                best_to_return = new_wpm
+            else:
+                is_new_record = False
+                best_to_return = highest_wpm
+
+            # 3. Har qanday holatda ham ushbu urinishni bazaga saqlaymiz
+            TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
+
+            return JsonResponse({
+                'status': 'success',
+                'is_new_record': is_new_record,
+                'best_wpm': best_to_return
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=400)

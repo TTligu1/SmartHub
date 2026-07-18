@@ -9,7 +9,6 @@
 
             <div class="card p-4 mb-4" style="background-color: #121824; border: 1px solid rgba(0, 242, 254, 0.15); border-radius: 15px;">
                 <p id="text-to-type" class="fs-4 text-secondary tracking-wide select-none m-0" style="line-height: 1.6;">{{ text_to_type }}</p>
-
             </div>
 
             <div class="mb-4">
@@ -22,7 +21,7 @@
                     <div class="fs-3 fw-bold text-success"><span id="wpm-val">0</span> <span class="fs-6 text-muted">WPM</span></div>
                 </div>
                 <div class="col-3">
-                    <div class="small text-secondary">Anriqlik</div>
+                    <div class="small text-secondary">Aniqlik</div>
                     <div class="fs-3 fw-bold text-warning"><span id="accuracy-val">100</span> <span class="fs-6 text-muted">%</span></div>
                 </div>
                 <div class="col-3">
@@ -31,17 +30,14 @@
                 </div>
             </div>
 
-            <div id="result-container" class="d-none mt-3 animate__animated animate__fadeIn">
-                <div class="alert bg-dark border-secondary p-4 rounded-3 d-inline-block w-100" style="background-color: #121824 !important;">
-                    <h5 id="result-status-text" class="fw-bold mb-3 text-info">O'yin yakunlandi!</h5>
-                    <div class="d-flex justify-content-center gap-3">
-                        <button onclick="window.location.reload();" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark">
-                            <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
-                        </button>
-                        <a href="{% url 'races_list' %}" class="btn btn-outline-info px-4 py-2 rounded-pill">
-                            <i class="fa-solid fa-trophy me-1"></i> Reytingni ko'rish
-                        </a>
-                    </div>
+            <div id="result-container" class="d-none mt-3">
+                <div id="result-box-card" class="alert p-4 rounded-3 d-inline-block w-100" style="background-color: #121824 !important; border: 1px solid rgba(255,255,255,0.1);">
+                    <h4 id="result-status-title" class="fw-bold mb-2"></h4>
+                    <p id="result-status-desc" class="text-white mb-2"></p>
+                    <p id="result-status-best" class="text-muted small mb-4"></p>
+
+                    <div id="result-actions" class="d-flex justify-content-center gap-3">
+                        </div>
                 </div>
             </div>
 
@@ -58,13 +54,16 @@
     const timeShow = document.getElementById('time-val');
 
     const resultContainer = document.getElementById('result-container');
-    const resultStatusText = document.getElementById('result-status-text');
+    const resultBoxCard = document.getElementById('result-box-card');
+    const resultStatusTitle = document.getElementById('result-status-title');
+    const resultStatusDesc = document.getElementById('result-status-desc');
+    const resultStatusBest = document.getElementById('result-status-best');
+    const resultActions = document.getElementById('result-actions');
 
     let startTime = null;
     let timerInterval = null;
     let isFinished = false;
 
-    // Matn harflarini belgilash
     textContainer.innerHTML = originalText.split('').map(char => `<span>${char}</span>`).join('');
     const charSpans = textContainer.querySelectorAll('span');
 
@@ -77,7 +76,6 @@
         }
 
         const inputVal = inputField.value;
-        let correctChars = 0;
         let mistakes = 0;
 
         charSpans.forEach((span, index) => {
@@ -86,20 +84,17 @@
                 span.className = '';
             } else if (char === span.innerText) {
                 span.className = 'text-success fw-bold';
-                correctChars++;
             } else {
                 span.className = 'text-danger fw-bold bg-danger bg-opacity-25';
                 mistakes++;
             }
         });
 
-        // Anriqlikni hisoblash
         if (inputVal.length > 0) {
             let acc = Math.round(((inputVal.length - mistakes) / inputVal.length) * 100);
             accShow.innerText = acc < 0 ? 0 : acc;
         }
 
-        // Matn to'liq yozib tugatilganda o'yinni to'xtatish
         if (inputVal.length >= originalText.length) {
             finishRace();
         }
@@ -123,7 +118,6 @@
         const finalWpm = wpmShow.innerText;
         const finalAccuracy = accShow.innerText;
 
-        // Backendga natijani yuborish
         fetch("{% url 'save_race_result' %}", {
             method: "POST",
             headers: {
@@ -134,31 +128,50 @@
         })
         .then(res => res.json())
         .then(data => {
-            // Xunuk alert o'rniga matnni pastdagi blok ichida ko'rsatamiz
-            resultStatusText.innerText = data.message;
-            if(data.status === 'success') {
-                resultStatusText.className = "fw-bold mb-3 text-success fs-5 animate__animated animate__bounceIn";
+            // Dinamik vizual o'zgarishlar
+            if (data.is_new_record === true || data.is_new_record === "true") {
+                resultBoxCard.style.border = "1px solid #198754";
+                resultStatusTitle.innerText = "🔥 YANGI REKORD!";
+                resultStatusTitle.className = "fw-bold mb-2 text-success fs-4";
+                resultStatusDesc.innerHTML = `Siz shaxsiy rekordingizni yangiladingiz: <span class="fw-bold text-success">${finalWpm} WPM</span>`;
+                resultStatusBest.innerText = "";
+
+                resultActions.innerHTML = `
+                    <button onclick="window.location.reload();" class="btn btn-success px-4 py-2 rounded-pill fw-bold">
+                        <i class="fa-solid fa-rotate-right me-1"></i> Yana o'ynash
+                    </button>
+                    <a href="/" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                        <i class="fa-solid fa-house me-1"></i> Bosh sahifa
+                    </a>
+                `;
             } else {
-                resultStatusText.className = "fw-bold mb-3 text-warning fs-5";
+                resultBoxCard.style.border = "1px solid #ffc107";
+                resultStatusTitle.innerText = "Yana o'ynaysizmi?";
+                resultStatusTitle.className = "fw-bold mb-2 text-warning fs-4";
+                resultStatusDesc.innerHTML = `Bu safargi tezlik: <span class="fw-bold text-warning">${finalWpm} WPM</span>`;
+                resultStatusBest.innerText = `Sizning eng yaxshi rekordingiz: ${data.best_wpm} WPM`;
+
+                resultActions.innerHTML = `
+                    <button onclick="window.location.reload();" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark">
+                        <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
+                    </button>
+                    <a href="/" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                        <i class="fa-solid fa-house me-1"></i> Bosh sahifa
+                    </a>
+                `;
             }
-            // Panelni ko'rinadigan qilish
             resultContainer.classList.remove('d-none');
         })
         .catch(err => {
-            resultStatusText.innerText = "Natijani saqlashda xatolik yuz berdi.";
-            resultStatusText.className = "fw-bold mb-3 text-danger";
+            resultStatusTitle.innerText = "Xatolik yuz berdi";
+            resultStatusTitle.className = "text-danger fw-bold";
             resultContainer.classList.remove('d-none');
         });
     }
 </script>
 
 <style>
-    /* Chiroyli ranglar effektlari uchun qo'shimcha CSS */
-    .tracking-wide span {
-        transition: all 0.1s ease;
-    }
-    .select-none {
-        user-select: none;
-    }
+    .tracking-wide span { transition: all 0.1s ease; }
+    .select-none { user-select: none; }
 </style>
 {% endblock %}
