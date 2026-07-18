@@ -276,7 +276,7 @@ TEXT_POOL = [
     "Python juda sodda va tushunarli dasturlash tili bo'lib, u sun'iy intellekt sohasida keng qo'llaniladi.",
     "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir.",
     "JavaScript bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
-    "Python – bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
+    "Python bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
 ]
 
 
