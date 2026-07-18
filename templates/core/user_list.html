@@ -36,7 +36,9 @@
                         <td>
                             {% if u.is_superuser or u.is_staff %}
                                 <span class="badge bg-danger rounded-pill px-2.5">Admin</span>
-                            {% elif u.profile.is_premium %}
+                            {% elif u.userprofile and u.userprofile.is_premium %}
+                                <span class="badge bg-warning text-dark rounded-pill px-2.5">⭐ Premium</span>
+                            {% elif u.profile and u.profile.is_premium %}
                                 <span class="badge bg-warning text-dark rounded-pill px-2.5">⭐ Premium</span>
                             {% else %}
                                 <span class="badge bg-secondary rounded-pill px-2.5">Foydalanuvchi</span>

@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 mb-4" style="position: relative; z-index: 1030;">
     <div class="container">
         <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="{% url 'home' %}">
             🚀 SmartHub
@@ -22,7 +22,8 @@
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <button class="btn btn-link text-info fw-medium text-decoration-none p-0 d-flex align-items-center border-0 shadow-none"
                         type="button"
-                        id="chatToggleBtn">
+                        id="chatToggleBtn"
+                        style="cursor: pointer; position: relative; z-index: 1031;">
                     <i class="fa-solid fa-user-circle me-1" style="font-size: 1.1rem;"></i> @{{ user.username }}
                 </button>
 
@@ -43,14 +44,14 @@
         <h5 class="fw-bold text-info m-0" style="font-size: 1.1rem;">
             <i class="fa-solid fa-paper-plane me-2"></i> SmartHub Chat
         </h5>
-        <button type="button" class="btn-close btn-close-white shadow-none" id="chatCloseBtn"></button>
+        <button type="button" class="btn-close btn-close-white shadow-none" id="chatCloseBtn" style="cursor: pointer;"></button>
     </div>
 
     <div class="sidebar-body d-flex flex-column h-100">
         <div class="p-3 bg-black bg-opacity-10 border-bottom border-secondary border-opacity-10">
             <div class="d-flex gap-3 mb-3" style="font-size: 0.85rem;">
-                <span class="text-info fw-bold border-bottom border-2 border-info pb-1 cursor-pointer"><i class="fa-solid fa-comment me-1"></i> Shaxsiy (1)</span>
-                <span class="text-white-50 cursor-pointer"><i class="fa-solid fa-users me-1"></i> Guruhlar</span>
+                <span class="text-info fw-bold border-bottom border-2 border-info pb-1" style="cursor: pointer;"><i class="fa-solid fa-comment me-1"></i> Shaxsiy (1)</span>
+                <span class="text-white-50" style="cursor: pointer;"><i class="fa-solid fa-users me-1"></i> Guruhlar</span>
             </div>
             <div class="position-relative">
                 <input type="text" class="form-control bg-dark border-0 text-white rounded-3 py-2 ps-5 shadow-none" placeholder="Ism yoki familiya..." style="font-size: 0.85rem; background-color: #0f131f !important;">
@@ -60,7 +61,7 @@
 
         <div class="flex-grow-1 overflow-y-auto p-2" style="background-color: #0f131f; max-height: calc(100vh - 180px);">
             <div class="d-flex flex-column gap-1">
-                <div class="d-flex align-items-center p-3 rounded-3 active-chat-item cursor-pointer">
+                <div class="d-flex align-items-center p-3 rounded-3 active-chat-item" style="cursor: pointer;">
                     <div class="position-relative me-3">
                         <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 42px; height: 42px; background-color: #2b5278;">
                             AH
@@ -86,19 +87,18 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <style>
-    .cursor-pointer { cursor: pointer; }
     .custom-chat-sidebar {
         position: fixed;
         top: 0;
-        left: -380px; /* Yashirin holat */
+        left: -380px;
         width: 380px;
         height: 100vh;
         background-color: #161c2a;
-        z-index: 1060;
+        z-index: 9999 !important; /* Barcha narsadan ustun turishi uchun */
         transition: left 0.3s ease-in-out;
     }
     .custom-chat-sidebar.show {
-        left: 0; /* Ochiq holat */
+        left: 0;
     }
     .sidebar-overlay {
         position: fixed;
@@ -107,7 +107,7 @@
         width: 100vw;
         height: 100vh;
         background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1050;
+        z-index: 9998 !important;
         display: none;
     }
     .sidebar-overlay.show {
@@ -120,33 +120,34 @@
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const toggleBtn = document.getElementById("chatToggleBtn");
-        const closeBtn = document.getElementById("chatCloseBtn");
-        const sidebar = document.getElementById("customChatSidebar");
-        const overlay = document.getElementById("sidebarOverlay");
+    (function() {
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("chatToggleBtn");
+            const closeBtn = document.getElementById("chatCloseBtn");
+            const sidebar = document.getElementById("customChatSidebar");
+            const overlay = document.getElementById("sidebarOverlay");
 
-        if(toggleBtn && sidebar && overlay) {
-            // Profil bosilganda ochish/yopish
-            toggleBtn.addEventListener("click", function(e) {
-                e.preventDefault();
-                sidebar.classList.toggle("show");
-                overlay.classList.toggle("show");
-            });
+            if (toggleBtn && sidebar && overlay) {
+                toggleBtn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sidebar.classList.toggle("show");
+                    overlay.classList.toggle("show");
+                });
 
-            // Yopish (X) tugmasi bosilganda
-            if(closeBtn) {
-                closeBtn.addEventListener("click", function() {
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        sidebar.classList.remove("show");
+                        overlay.classList.remove("show");
+                    });
+                }
+
+                overlay.addEventListener("click", function() {
                     sidebar.classList.remove("show");
                     overlay.classList.remove("show");
                 });
             }
-
-            // Orqa fonga bosilganda yopish
-            overlay.addEventListener("click", function() {
-                sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-            });
-        }
-    });
+        });
+    })();
 </script>
