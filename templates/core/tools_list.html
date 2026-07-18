@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h2 class="text-center text-white mb-4 fw-bold">🛠️ SmartHub Asboblar Paneli</h2>
+
+            {% if user.is_staff or user.is_superuser %}
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-5">
+                    <div class="card p-3 text-center border-0 text-white shadow-sm" style="background-color: #1c2333; border-left: 4px solid #00f2fe !important; border-radius: 12px;">
+                        <div class="small text-white-50 text-uppercase tracking-wider fw-bold">
+                            <i class="fa-solid fa-users me-1"></i> Tizimdagi jami a'zolar soni
+                        </div>
+                        <div class="display-6 fw-bold text-info mt-1">{{ total_users }} ta</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                        <div class="fs-1 mb-3 text-info"><i class="fa-solid fa-qrcode"></i></div>
+                        <h4>QR Kod Generator</h4>
+                        <p class="text-secondary small">Istalgan matn yoki havolalarni bir lahzada xavfsiz QR kodga aylantiring.</p>
+                        <a href="{% url 'qr_generator' %}" class="btn btn-outline-info w-100 mt-auto rounded-pill">O'tish</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                        <div class="fs-1 mb-3 text-success"><i class="fa-solid fa-barcode"></i></div>
+                        <h4>Shtrix Kod Generator</h4>
+                        <p class="text-secondary small">Mahsulotlar yoki tizimlar uchun Code128 formatida shtrix kodlar yarating.</p>
+                        <a href="{% url 'barcode_generator' %}" class="btn btn-outline-success w-100 mt-auto rounded-pill">O'tish</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                        <div class="fs-1 mb-3 text-primary"><i class="fa-solid fa-brain"></i></div>
+                        <h4>SmartHub AI Chat</h4>
+                        <p class="text-secondary small">Sun'iy intellekt bilan suhbat quring, savollaringizga tezkor javob oling.</p>
+                        <a href="{% url 'ai_chat' %}" class="btn btn-outline-primary w-100 mt-auto rounded-pill">Suhbatni boshlash</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                        <div class="fs-1 mb-3 text-danger"><i class="fa-solid fa-file-pdf"></i></div>
+                        <h4>PDF Instrumentlar</h4>
+                        <p class="text-secondary small">PDF fayllarni Wordga o'tkazish, birlashtirish va sahifalarga ajratish.</p>
+                        <a href="{% url 'pdf_tools' %}" class="btn btn-outline-danger w-100 mt-auto rounded-pill">O'tish</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                        <div class="fs-1 mb-3 text-warning"><i class="fa-solid fa-image"></i></div>
+                        <h4>Rasm Instrumentlari</h4>
+                        <p class="text-secondary small">Rasmlar fonini o'chirish, hajmini siqish va qirqish amallari.</p>
+                        <a href="{% url 'image_tools' %}" class="btn btn-outline-warning w-100 mt-auto rounded-pill">O'tish</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark text-white h-100 p-4" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid #ffa657;">
+                        <div class="fs-1 mb-3" style="color: #ffa657;"><i class="fa-solid fa-keyboard"></i></div>
+                        <h4>Tez Yozish Poygasi</h4>
+                        <p class="text-secondary small">Klavaturada yozish tezligingizni sinang va peshqadamlar reytingiga kiring.</p>
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="{% url 'race_arena' %}" class="btn btn-warning w-50 rounded-pill fw-bold text-dark">
+                                <i class="fa-solid fa-play me-1"></i> Poyga
+                            </a>
+                            <a href="{% url 'races_list' %}" class="btn btn-outline-warning w-50 rounded-pill">
+                                <i class="fa-solid fa-trophy me-1"></i> Reyting
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-5 pt-3">
+                <div class="col-md-8 text-center">
+                    <div class="p-4 rounded-3 shadow-sm" style="background-color: #121824; border: 1px solid rgba(0, 242, 254, 0.1); border-radius: 15px;">
+                        <h5 class="text-white fw-bold mb-2"><i class="fa-solid fa-heart text-danger me-1"></i> Loyiha sizga yoqdimi?</h5>
+                        <p class="text-secondary small mb-3">Agar dasturimiz sizga ma'qul kelgan bo'lsa va yordami tekkan bo'lsa, loyihani rivojlantirishga hissa qo'shishingiz mumkin.</p>
+
+                        <a href="https://click.uz/" target="_blank" class="btn btn-primary px-4 py-2.5 fw-bold rounded-pill shadow-sm" style="background: linear-gradient(135deg, #0056B3 0%, #007BFF 100%); border: none; transition: 0.3s;">
+                            <i class="fa-solid fa-credit-card me-2"></i> Click orqali qo'llab-quvvatlash
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

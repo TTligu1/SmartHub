@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="mb-4">
+                <a href="{% url 'tools_home' %}" class="btn btn-sm btn-outline-info px-4 rounded-pill">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Orqaga
+                </a>
+            </div>
+
+            <div class="card bg-dark text-white p-4 p-md-5 shadow" style="border-radius: 15px; background-color: #121824 !important; border: 1px solid rgba(0, 242, 254, 0.1);">
+                <h2 class="fw-bold mb-3 d-flex align-items-center text-danger">
+                    <i class="fa-solid fa-file-pdf me-2"></i> PDF Tools
+                </h2>
+                <p class="text-secondary mb-4">PDF hujjatlarini konvertatsiya qiling, birlashtiring yoki qismlarga ajrating.</p>
+
+                {% if success_message %}
+                <div class="alert alert-success bg-success bg-opacity-25 text-white border-success mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i> {{ success_message }}
+                    {% if result_file %}
+                    <div class="mt-2">
+                        <a href="#" class="btn btn-sm btn-success px-3 rounded-pill">
+                            <i class="fa-solid fa-download me-1"></i> Yuklab olish
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="action_type" class="form-label text-white-50 fw-medium">
+                            <i class="fa-solid fa-gear me-1"></i> Operatsiyani tanlang:
+                        </label>
+                        <select class="form-select bg-dark text-white border-secondary py-2.5" id="action_type" name="action_type" required style="border-radius: 10px;">
+                            <option value="to_word" {% if action_type == 'to_word' %}selected{% endif %}>📄 PDF to Word / Word to PDF</option>
+                            <option value="merge" {% if action_type == 'merge' %}selected{% endif %}>➕ PDF fayllarni birlashtirish</option>
+                            <option value="split" {% if action_type == 'split' %}selected{% endif %}>✂️ PDF faylni sahifalarga ajratish</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="pdf_file" class="form-label text-white-50 fw-medium">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Faylni yuklang (.pdf formatida):
+                        </label>
+                        <input type="file" class="form-control bg-dark text-white border-secondary py-2.5" id="pdf_file" name="pdf_file" accept=".pdf,.docx,.doc" required style="border-radius: 10px;">
+                        <div class="invalid-feedback">Iltimos, qayta ishlash uchun fayl tanlang!</div>
+                    </div>
+
+                    <div class="mt-4 pt-2">
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold text-uppercase tracking-wider shadow-sm" style="border-radius: 10px; background-color: #198754 !important;">
+                            Hujjatni qayta ishlash <i class="fa-solid fa-bolt ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap form validatsiyasi uchun kichik skript
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

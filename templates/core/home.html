@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center py-5 mt-4">
+    <span class="badge bg-secondary bg-opacity-25 text-info border border-info border-opacity-25 px-4 py-2 rounded-pill mb-4 fs-6">
+        ✨ Barcha raqamli asboblar bitta platformada
+    </span>
+
+    <h1 class="hero-title mb-3">SmartHub</h1>
+
+    <p class="hero-subtitle mx-auto mb-4" style="max-width: 650px;">
+        AI chat, PDF konverterlar, rasm va matn muharrirlari hamda dasturchilar uchun eng kerakli va tezkor vositalar to'plami.
+    </p>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'tools_home' %}" class="btn btn-glow btn-lg px-5 py-3 mb-5">
+            Hozir boshlash ⚡
+        </a>
+    {% else %}
+        <div class="mb-5">
+            <p class="text-warning mb-3">⚠️ Xizmatlardan to'liq foydalanish uchun hisobingizga kiring yoki ro'yxatdan o'ting.</p>
+            <a href="{% url 'login' %}" class="btn btn-glow btn-lg px-4 py-3 me-3">
+                Kirish (Login) 🔑
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-outline-info btn-lg px-4 py-3 rounded-pill">
+                Ro'yxatdan o'tish (Register) 📝
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="container pb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-white">Bizning imkoniyatlar</h2>
+        <p class="text-muted">Eng ommabop yo'nalishlar bilan tanishing</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="tool-card p-4 text-center h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="fs-1 d-block mb-3">🧠</span>
+                    <h4 class="text-white fw-bold">AI Tools</h4>
+                    <p class="text-muted small">AI Chat, matn yozish va aqlli kod yordamchisi tizimlari.</p>
+                </div>
+                <a href="{% url 'ai_chat' %}" class="btn btn-outline-info btn-sm rounded-pill mt-3">Kirish →</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="tool-card p-4 text-center h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="fs-1 d-block mb-3">📄</span>
+                    <h4 class="text-white fw-bold">PDF Tools</h4>
+                    <p class="text-muted small">PDF birlashtirish, bo'lish, siqish va Word formatga o'tkazish.</p>
+                </div>
+                <a href="{% url 'tools_home' %}" class="btn btn-outline-info btn-sm rounded-pill mt-3">Kirish →</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="tool-card p-4 text-center h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="fs-1 d-block mb-3">🖼️</span>
+                    <h4 class="text-white fw-bold">Image Tools</h4>
+                    <p class="text-muted small">Orqa fonni o'chirish, rasm o'lchamini o'zgartirish va siqish.</p>
+                </div>
+                <a href="{% url 'tools_home' %}" class="btn btn-outline-info btn-sm rounded-pill mt-3">Kirish →</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="tool-card p-4 text-center h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="fs-1 d-block mb-3">💻</span>
+                    <h4 class="text-white fw-bold">Dev Tools</h4>
+                    <p class="text-muted small">JSON formatter, Base64 kodlash, QR va Barcode generatorlari.</p>
+                </div>
+                <a href="{% url 'tools_home' %}" class="btn btn-outline-info btn-sm rounded-pill mt-3">Kirish →</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

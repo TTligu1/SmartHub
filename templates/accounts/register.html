@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card p-4 tool-card" style="width: 100%; max-width: 450px;">
+        <h2 class="text-center text-white mb-4">Ro'yxatdan o'tish</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="text-white mb-3">
+                {{ form.as_p }}
+            </div>
+
+            <button type="submit" class="btn btn-glow w-100 py-3 mt-3">Ro'yxatdan o'tish 🚀</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <p class="text-muted small">Profilingiz bormi? <a href="{% url 'login' %}" class="text-info text-decoration-none">Kirish</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    form p label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    form p input {
+        width: 100%;
+        padding: 10px 15px;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px;
+        color: #fff !important;
+        margin-bottom: 15px;
+    }
+    form p input:focus {
+        border-color: var(--accent-blue) !important;
+        outline: none;
+    }
+    .helptext {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-muted) !important;
+        margin-top: -10px;
+        margin-bottom: 15px;
+    }
+    .errorlist {
+        color: #ff6b6b;
+        list-style: none;
+        padding-left: 0;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

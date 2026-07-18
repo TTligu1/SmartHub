@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHub AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#00f2fe">
+
+    <style>
+        body {
+            background-color: #0b0e14;
+            color: #ffffff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+        }
+        .navbar-custom {
+            background-color: #121824 !important;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+        }
+        /* Navbardagi faol bo'lmagan linklar rangini oqroq qilish */
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.75) !important;
+            transition: color 0.2s ease;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #00f2fe !important;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0e14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1c2333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'includes/navbar.html' %}
+
+    <main class="py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'sw.js' %}")
+                    .then(reg => console.log('SmartHub Service Worker faol!'))
+                    .catch(err => console.error('Service Workerda xatolik:', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('installApp');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) {
+                installBtn.style.setProperty('display', 'inline-flex', 'important');
+            }
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', () => {
+                installBtn.style.display = 'none';
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Foydalanuvchi ilovani o\'rnatdi.');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

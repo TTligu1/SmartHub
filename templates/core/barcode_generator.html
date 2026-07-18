@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="tool-card p-4 text-center" style="background-color: rgba(20, 24, 33, 0.95); border: 1px solid rgba(0, 242, 254, 0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.37);">
+
+                <h2 class="text-white fw-bold mb-3">📊 Barcode (Shtrix-kod) Generator</h2>
+
+                <p class="text-white-50 mb-4 fs-6">
+                    Mahsulot yoki ma'lumot raqamini kiriting va bir zumda yuqori sifatli shtrix-kod oling.
+                </p>
+
+                <form method="post" class="text-start">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="barcode_text" class="form-label text-info fw-semibold mb-2 fs-5">
+                            Raqam yoki matn kiriting (masalan, 12345678):
+                        </label>
+                        <input type="text"
+                               id="barcode_text"
+                               name="barcode_text"
+                               class="form-control bg-secondary bg-opacity-10 text-white border-secondary py-3 px-3 rounded-3"
+                               placeholder="Bu yerga yozing..."
+                               value="{{ code_data }}"
+                               required
+                               autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="btn btn-glow w-100 py-3 rounded-3 fw-bold fs-5 mb-3">
+                        Yaratish ✨
+                    </button>
+                </form>
+
+                {% if error_message %}
+                    <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger mt-3" role="alert">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if barcode_image %}
+                    <div class="mt-4 p-4 rounded-3 bg-white d-inline-block shadow-lg">
+                        <img src="data:image/png;base64,{{ barcode_image }}" alt="Shtrix-kod" class="img-fluid">
+                        <div class="mt-3">
+                            <a href="data:image/png;base64,{{ barcode_image }}" download="barcode_{{ code_data }}.png" class="btn btn-success btn-sm px-4 py-2 rounded-pill fw-bold">
+                                📥 Yuklab olish
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{% url 'tools_home' %}" class="text-decoration-none text-info fw-semibold">
+                        ← Orqaga qaytish
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
