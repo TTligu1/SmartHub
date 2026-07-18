@@ -66,7 +66,7 @@
     let totalKeystrokes = 0;
     let totalMistakes = 0;
 
-    // Matnni span elementlariga ajratib joylash (probellarni saqlagan holda)
+    // Matnni harflarga ajratish
     textContainer.innerHTML = originalText.split('').map(char => {
         if (char === " ") {
             return `<span style="border-bottom: 2px dashed rgba(255,255,255,0.15);">&nbsp;</span>`;
@@ -76,11 +76,8 @@
 
     const charSpans = textContainer.querySelectorAll('span');
 
-    // 📍 1. Bosilgandayoq xatoni tekshirish va uni inputga mutlaqo yozdirmaslik logikasi
     inputField.addEventListener('keydown', (e) => {
         if (isFinished) return;
-
-        // Boshqaruv klavishlariga (Backspace, Enter, Arrows) ruxsat berish
         if (e.key.length > 1) return;
 
         if (!startTime) {
@@ -92,7 +89,6 @@
         const currentPos = inputField.value.length;
         const expectedChar = originalText[currentPos];
 
-        // Agar kiritilgan harf kutilayotgan harf bilan mos kelmasa, yozishni bloklash
         if (e.key !== expectedChar) {
             e.preventDefault();
             totalMistakes++;
@@ -100,12 +96,10 @@
             if(charSpans[currentPos]) {
                 charSpans[currentPos].classList.add('text-danger', 'fw-bold', 'bg-danger', 'bg-opacity-25');
             }
-
             updateAccuracy();
         }
     });
 
-    // 📍 2. To'g'ri yozilgan harflarni yashil rangga o'tkazish
     inputField.addEventListener('input', () => {
         if (isFinished) return;
 
@@ -144,7 +138,6 @@
         }
     }
 
-    // 📍 3. Natijani backend-ga yuborish va rekord holatini qat'iy tekshirish
     function finishRace() {
         clearInterval(timerInterval);
         isFinished = true;
@@ -161,45 +154,50 @@
             },
             body: JSON.stringify({ wpm: finalWpm, accuracy: finalAccuracy })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Server xatoligi yuz berdi");
+            }
+            return res.json();
+        })
         .then(data => {
-            // Backend-dan kelgan bool qiymatni qat'iy tekshirish (false bo'lsa rekord deyilmaydi)
             if (data.is_new_record === true) {
                 resultBoxCard.style.border = "2px solid #198754";
                 resultStatusTitle.innerText = "🔥 REKORD YANGILANDI!";
                 resultStatusTitle.className = "fw-bold mb-2 text-success fs-3";
                 resultStatusDesc.innerHTML = `Dahshatli natija! Yangi eng yuqori tezlik: <span class="fw-bold text-success fs-4">${finalWpm} WPM</span>`;
                 resultStatusBest.innerText = "";
-
-                resultActions.innerHTML = `
-                    <button onclick="window.location.reload();" class="btn btn-success px-4 py-2 rounded-pill fw-bold">
-                        <i class="fa-solid fa-rotate-right me-1"></i> Yana o'ynash
-                    </button>
-                    <a href="{% url 'tools_home' %}" class="btn btn-outline-light px-4 py-2 rounded-pill">
-                        <i class="fa-solid fa-gauge me-1"></i> Asboblar paneli
-                    </a>
-                `;
             } else {
                 resultBoxCard.style.border = "2px solid #ffc107";
                 resultStatusTitle.innerText = "Yana o'ynaysizmi?";
                 resultStatusTitle.className = "fw-bold mb-2 text-warning fs-3";
                 resultStatusDesc.innerHTML = `Bu safargi tezligingiz: <span class="fw-bold text-warning fs-5">${finalWpm} WPM</span>`;
-                resultStatusBest.innerText = `Sizning eng yaxshi rekordingiz: ${data.best_wpm} WPM`;
-
-                resultActions.innerHTML = `
-                    <button onclick="window.location.reload();" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark">
-                        <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
-                    </button>
-                    <a href="{% url 'tools_home' %}" class="btn btn-outline-light px-4 py-2 rounded-pill">
-                        <i class="fa-solid fa-gauge me-1"></i> Asboblar paneli
-                    </a>
-                `;
+                resultStatusBest.innerText = `Sizning eng yaxshi rekordingiz: ${data.best_wpm || 0} WPM`;
             }
+
+            resultActions.innerHTML = `
+                <button onclick="window.location.reload();" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
+                </button>
+                <a href="{% url 'tools_home' %}" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                    <i class="fa-solid fa-gauge me-1"></i> Asboblar paneli
+                </a>
+            `;
             resultContainer.classList.remove('d-none');
         })
         .catch(err => {
-            resultStatusTitle.innerText = "Xatolik yuz berdi";
-            resultStatusTitle.className = "text-danger fw-bold";
+            // Muammo chiqsa default blok yoqiladi
+            resultBoxCard.style.border = "2px solid #dc3545";
+            resultStatusTitle.innerText = "⚠️ Tizimda kichik xatolik";
+            resultStatusTitle.className = "fw-bold mb-2 text-danger fs-3";
+            resultStatusDesc.innerHTML = `Natijangiz: <span class="fw-bold text-white">${finalWpm} WPM</span>. Ammo internet aloqasi yoki sessiya muddati tufayli saqlanmadi.`;
+            resultStatusBest.innerText = "";
+
+            resultActions.innerHTML = `
+                <button onclick="window.location.reload();" class="btn btn-danger px-4 py-2 rounded-pill fw-bold">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Qayta urinish
+                </button>
+            `;
             resultContainer.classList.remove('d-none');
         });
     }
