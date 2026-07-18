@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # Asosiy va asboblar sahifalari
     path('', views.home, name='home'),
+    path('accounts/register/', views.register_view, name='register'),
     path('tools/', views.tools_home, name='tools_home'),
     path('ai-chat/', views.ai_chat, name='ai_chat'),
 

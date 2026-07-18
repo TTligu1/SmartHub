@@ -9,7 +9,26 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Max
+from django.contrib.auth.forms import UserCreationForm  # 👈 RO'YXATDAN O'TISH FORMASI QO'SHILDI
+from django.contrib import messages  # 👈 XABARLAR QO'SHILDI
 from .models import ChatSession, ChatMessage, TypingResult
+
+
+# ==========================================
+# 0. Ro'yxatdan o'tish sahifasi (YANGI QO'SHILDI)
+# ==========================================
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Muvaffaqiyatli ro'yxatdan o'tdingiz! Endi tizimga kirishingiz mumkin. 🎉")
+            return redirect('login')  # Ro'yxatdan o'tgach, login sahifasiga o'tadi
+    else:
+        form = UserCreationForm()
+
+    # HTML-ga 'form' kaliti bilan formani yuboramiz
+    return render(request, 'accounts/register.html', {'form': form})
 
 
 # 1. Bosh sahifa
@@ -131,7 +150,7 @@ def ai_chat(request):
             elif "rahmat" in msg_lower:
                 ai_response = "Sizga ham katta rahmat! Yordam bera olganimdan xursandman. 🌟"
             elif "yaratdi" in msg_lower or "avtor" in msg_lower:
-                ai_response = "Meni siz (SmartHub dasturchisi) yaratgan! Juda zo'r dasturchisiz! 💻⚡"
+                ai_response = "Mening yaratuvchim — siz! Juda zo'r dasturchisiz! 💻⚡"
             else:
                 ai_response = f"Siz '{user_message}' deb yozdingiz. Men hali o'rganish jarayonidaman, lekin tez orada juda aqlli bo'lib ketaman! 😉"
 
@@ -226,7 +245,7 @@ def race_arena(request):
     return render(request, 'core/race_arena.html', {'text_to_type': random_text})
 
 
-# Reyting jadvali (Faqat har bir foydalanuvchining eng yuqori natijasini chiqaradi)
+# Reyting jadvali
 @login_required(login_url='login')
 def races_list(request):
     top_results = (
@@ -247,7 +266,7 @@ def races_list(request):
     return render(request, 'core/races_list.html', {'leaderboard': leaderboard})
 
 
-# Natijani saqlash (Agar yangi natija rekorddan katta bo'lsa saqlaydi)
+# Natijani saqlash
 @login_required(login_url='login')
 def save_race_result(request):
     if request.method == "POST":

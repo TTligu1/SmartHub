@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="card p-4 tool-card" style="width: 100%; max-width: 450px;">
-        <h2 class="text-center text-white mb-4">Ro'yxatdan o'tish</h2>
+    <div class="card p-4 tool-card" style="width: 100%; max-width: 450px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 class="text-center text-dark mb-4" style="font-weight: 600;">Ro'yxatdan o'tish</h2>
 
         {% if messages %}
             {% for message in messages %}
@@ -16,51 +16,64 @@
         <form method="post">
             {% csrf_token %}
 
-            <div class="text-white mb-3">
+            <div class="mb-3 backend-form">
                 {{ form.as_p }}
             </div>
 
-            <button type="submit" class="btn btn-glow w-100 py-3 mt-3">Ro'yxatdan o'tish 🚀</button>
+            <button type="submit" class="btn btn-primary w-100 py-3 mt-3" style="border-radius: 8px; font-weight: 600;">Ro'yxatdan o'tish 🚀</button>
         </form>
 
         <div class="text-center mt-3">
-            <p class="text-muted small">Profilingiz bormi? <a href="{% url 'login' %}" class="text-info text-decoration-none">Kirish</a></p>
+            <p class="text-muted small">Profilingiz bormi? <a href="{% url 'login' %}" class="text-primary text-decoration-none" style="font-weight: 500;">Kirish</a></p>
         </div>
     </div>
 </div>
 
 <style>
-    form p label {
+    /* Django formasi paragraflari va labellarini tartibga solamiz */
+    .backend-form p {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .backend-form p label {
         display: block;
-        margin-bottom: 5px;
-        color: var(--text-muted);
-        font-size: 0.9rem;
+        margin-bottom: 8px;
+        color: #212529 !important; /* Yozuvlar mutlaqo qora/to'q kulrang */
+        font-size: 0.95rem;
+        font-weight: 500;
     }
-    form p input {
+    .backend-form p input {
         width: 100%;
-        padding: 10px 15px;
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 12px 15px;
+        background-color: #f8f9fa !important; /* Input foni och kulrang */
+        border: 1px solid #ced4da !important;  /* Chegara chizig'i aniq ko'rinishi uchun */
         border-radius: 8px;
-        color: #fff !important;
-        margin-bottom: 15px;
+        color: #212529 !important; /* Foydalanuvchi yozadigan matn rangi to'q rangda */
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    form p input:focus {
-        border-color: var(--accent-blue) !important;
+    .backend-form p input:focus {
+        border-color: #0d6efd !important; /* Aktiv bo'lganda ko'k chegara */
+        background-color: #ffffff !important;
         outline: none;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
+    /* Parol shartlari haqidagi yordamchi kichik matnlar */
     .helptext {
         display: block;
-        font-size: 0.75rem;
-        color: var(--text-muted) !important;
-        margin-top: -10px;
-        margin-bottom: 15px;
+        font-size: 0.8rem;
+        color: #6c757d !important; /* Yordamchi yozuvlar kulrangda */
+        margin-top: 5px;
+        line-height: 1.4;
     }
+    /* Xatoliklar ro'yxati (parol to'g'ri kelmasa va hk) */
     .errorlist {
-        color: #ff6b6b;
+        color: #dc3545;
         list-style: none;
         padding-left: 0;
         font-size: 0.85rem;
+        margin-top: 5px;
+        font-weight: 600;
     }
 </style>
 {% endblock %}
