@@ -401,3 +401,19 @@ def ai_chat(request):
         'user_messages_count': user_messages_count,
         'is_premium': profile.is_premium  # Shablonda yulduzcha chiqarish uchun
     })
+
+
+from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
+
+
+@login_required(login_url='login')
+def user_activity_list(request):
+    # Agar kirgan odam admin bo'lmasa, kirishni taqiqlaymiz
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Sizda bu sahifani ko'rish huquqi yo'q!")
+
+    # Barcha foydalanuvchilarni oxirgi kirgan vaqti bo'yicha saralab olamiz
+    all_users = User.objects.all().order_by('-last_login')
+
+    return render(request, 'core/user_list.html', {'all_users': all_users})

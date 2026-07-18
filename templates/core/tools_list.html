@@ -10,12 +10,15 @@
             {% if user.is_staff or user.is_superuser %}
             <div class="row justify-content-center mb-5">
                 <div class="col-md-5">
-                    <div class="card p-3 text-center border-0 text-white shadow-sm" style="background-color: #1c2333; border-left: 4px solid #00f2fe !important; border-radius: 12px;">
-                        <div class="small text-white-50 text-uppercase tracking-wider fw-bold">
-                            <i class="fa-solid fa-users me-1"></i> Tizimdagi jami a'zolar soni (Admin Panel)
+                    <a href="{% url 'user_activity_list' %}" class="text-decoration-none d-block card-hover" style="transition: transform 0.2s;">
+                        <div class="card p-3 text-center border-0 text-white shadow-sm" style="background-color: #1c2333; border-left: 4px solid #00f2fe !important; border-radius: 12px;">
+                            <div class="small text-white-50 text-uppercase tracking-wider fw-bold">
+                                <i class="fa-solid fa-users me-1"></i> Tizimdagi jami a'zolar soni (Admin Panel)
+                            </div>
+                            <div class="display-6 fw-bold text-info mt-1">{{ users_count }} ta</div>
+                            <div class="small text-info mt-2"><i class="fa-solid fa-eye me-1"></i> Batafsil ko'rish uchun bosing</div>
                         </div>
-                        <div class="display-6 fw-bold text-info mt-1">{{ users_count }} ta</div>
-                    </div>
+                    </a>
                 </div>
             </div>
             {% endif %}
@@ -99,4 +102,11 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Karta ustiga sichqoncha kelganda chiroyli effekt berish uchun */
+    .card-hover:hover {
+        transform: translateY(-3px);
+    }
+</style>
 {% endblock %}

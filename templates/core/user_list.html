@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white fw-bold m-0" style="background: linear-gradient(to right, #ffffff, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            👥 Tizim Foydalanuvchilari Ro'yxati
+        </h2>
+        <a href="{% url 'tools_home' %}" class="btn btn-outline-info rounded-pill px-4">
+            ← Panelga qaytish
+        </a>
+    </div>
+
+    <div class="card p-4 border-0 text-white shadow-sm" style="background-color: #121824; border-radius: 16px; border: 1px solid rgba(0, 242, 254, 0.1);">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover m-0 align-middle" style="--bs-table-bg: transparent; color: #e2e8f0;">
+                <thead>
+                    <tr style="border-bottom: 2px solid rgba(0, 242, 254, 0.2); color: #00f2fe;">
+                        <th scope="col">#</th>
+                        <th scope="col">Foydalanuvchi nomi</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ro'yxatdan o'tgan sana</th>
+                        <th scope="col">Oxirgi marta kirgan vaqti</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in all_users %}
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                        <td class="fw-bold text-secondary">{{ forloop.counter }}</td>
+                        <td>
+                            <span class="fw-bold text-white">@{{ u.username }}</span>
+                            {% if u.id == user.id %}
+                                <span class="badge bg-info text-dark ms-1" style="font-size: 10px;">Siz</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.is_superuser or u.is_staff %}
+                                <span class="badge bg-danger rounded-pill px-2.5">Admin</span>
+                            {% elif u.profile.is_premium %}
+                                <span class="badge bg-warning text-dark rounded-pill px-2.5">⭐ Premium</span>
+                            {% else %}
+                                <span class="badge bg-secondary rounded-pill px-2.5">Foydalanuvchi</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-white-50 small">{{ u.date_joined|date:"d.m.Y, H:i" }}</td>
+                        <td>
+                            {% if u.last_login %}
+                                <span class="text-success small"><i class="fa-solid fa-clock me-1"></i> {{ u.last_login|date:"d.m.Y, H:i" }}</span>
+                            {% else %}
+                                <span class="text-muted small">Hali kirmagan</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
