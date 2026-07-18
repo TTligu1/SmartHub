@@ -50,7 +50,7 @@
 </div>
 
 <script>
-    const originalText = "{{ text_to_type }}";
+    const originalText = "{{ text_to_type|safe }}";
     const inputField = document.getElementById('input-field');
     const textContainer = document.getElementById('text-to-type');
     const wpmShow = document.getElementById('wpm-val');

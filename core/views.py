@@ -329,3 +329,48 @@ def user_activity_list(request):
 
     all_users = User.objects.all().order_by('-last_login')
     return render(request, 'core/user_list.html', {'all_users': all_users})
+
+
+@login_required(login_url='login')
+def user_chat_room(request):
+    search_query = request.GET.get('search', '').strip()
+    receiver_id = request.GET.get('user_id')  # Kim bilan yozishilayotgani
+
+    # O'zimizdan tashqari barcha foydalanuvchilar
+    users = User.objects.exclude(id=request.user.id)
+    if search_query:
+        users = users.filter(username__icontains=search_query)
+
+    active_receiver = None
+    messages_chat = []
+
+    if receiver_id:
+        active_receiver = User.objects.filter(id=receiver_id).first()
+        if active_receiver:
+            # Ikki foydalanuvchi o'rtasidagi shaxsiy xabarlar (Sender yoki Receiver bo'lgan holatlar)
+            messages_chat = UserMessage.objects.filter(
+                (models.Q(sender=request.user) & models.Q(receiver=active_receiver)) |
+                (models.Q(sender=active_receiver) & models.Q(receiver=request.user))
+            )
+    else:
+        # Agar hech kim tanlanmagan bo'lsa, Umumiy Guruh Chati xabarlarini ko'rsatish (receiver=None)
+        messages_chat = UserMessage.objects.filter(receiver__isnull=True)
+
+    if request.method == 'POST':
+        message_text = request.POST.get('message', '').strip()
+        if message_text:
+            UserMessage.objects.create(
+                sender=request.user,
+                receiver=active_receiver,  # Tanlangan odam yoki Umumiy guruh (None)
+                text=message_text
+            )
+            if active_receiver:
+                return redirect(f'/chat/?user_id={active_receiver.id}')
+            return redirect('/chat/')
+
+    return render(request, 'core/user_chat.html', {
+        'users': users,
+        'active_receiver': active_receiver,
+        'messages_chat': messages_chat,
+        'search_query': search_query
+    })
