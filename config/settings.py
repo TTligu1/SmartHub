@@ -112,3 +112,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Avtorizatsiya sozlamalari
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Render serverida 403 Forbidden CSRF xatoligini to'g'rilash uchun ishonchli domenlar
+CSRF_TRUSTED_ORIGINS = [
+    'https://smarthub-ywyl.onrender.com',
+]
