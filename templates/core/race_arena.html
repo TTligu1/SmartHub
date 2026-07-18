@@ -65,9 +65,8 @@
     let isFinished = false;
     let totalKeystrokes = 0;
     let totalMistakes = 0;
-    let lastValidLength = 0;
 
-    // Har bir harfni span ichiga olish (probellarni ham yo'qotmaslik uchun)
+    // Matnni spanlarga ajratish
     textContainer.innerHTML = originalText.split('').map(char => {
         if (char === " ") {
             return `<span style="border-bottom: 2px dashed rgba(255,255,255,0.15);">&nbsp;</span>`;
@@ -77,8 +76,12 @@
 
     const charSpans = textContainer.querySelectorAll('span');
 
-    inputField.addEventListener('input', (e) => {
+    // 📍 1. MUKAMMAL STRATEGIYA: Tugma bosilgandayoq xatoni tekshirib, yozdirishni cheklash
+    inputField.addEventListener('keydown', (e) => {
         if (isFinished) return;
+
+        // Boshqaruv tugmalariga ruxsat beramiz (Backspace, Delete, Arrow, Enter va hkz)
+        if (e.key.length > 1) return;
 
         if (!startTime) {
             startTime = new Date();
@@ -86,44 +89,53 @@
         }
 
         totalKeystrokes++;
-        let inputVal = inputField.value;
-        let currentMistakeIndex = -1;
+        const currentPos = inputField.value.length;
+        const expectedChar = originalText[currentPos];
 
-        // Klasslarni tozalash
-        charSpans.forEach(span => {
-            span.classList.remove('text-success', 'fw-bold', 'text-danger', 'bg-danger', 'bg-opacity-25');
+        // Agar kiritilayotgan belgi kutilayotgan belgiga teng bo'lmasa -> BLOKLAYMIZ
+        if (e.key !== expectedChar) {
+            e.preventDefault(); // Inputga yozilishini taqiqlash
+            totalMistakes++;
+
+            // Xato harfni matnda vizual ko'rsatish
+            if(charSpans[currentPos]) {
+                charSpans[currentPos].classList.add('text-danger', 'fw-bold', 'bg-danger', 'bg-opacity-25');
+            }
+
+            updateAccuracy();
+        }
+    });
+
+    // 📍 2. To'g'ri yozilgandagi vizual effektlar
+    inputField.addEventListener('input', () => {
+        if (isFinished) return;
+
+        let inputVal = inputField.value;
+
+        // Klasslarni yangilash
+        charSpans.forEach((span, i) => {
+            if (i < inputVal.length) {
+                span.classList.remove('text-danger', 'bg-danger', 'bg-opacity-25');
+                span.classList.add('text-success', 'fw-bold');
+            } else {
+                span.classList.remove('text-success', 'fw-bold', 'text-danger', 'bg-danger', 'bg-opacity-25');
+            }
         });
 
-        // Harflarni tekshirish
-        for (let i = 0; i < inputVal.length; i++) {
-            if (inputVal[i] === originalText[i]) {
-                if (currentMistakeIndex === -1) {
-                    charSpans[i].classList.add('text-success', 'fw-bold');
-                }
-            } else {
-                currentMistakeIndex = i;
-                charSpans[i].classList.add('text-danger', 'fw-bold', 'bg-danger', 'bg-opacity-25');
-                break;
-            }
-        }
+        updateAccuracy();
 
-        // 📍 MUZLATISH: Agar xato qilsa, inputni xato harfdan nariga o'tkazmaymiz
-        if (currentMistakeIndex !== -1) {
-            inputField.value = inputVal.substring(0, currentMistakeIndex + 1);
-            totalMistakes++;
+        // Tugashini tekshirish
+        if (inputVal === originalText) {
+            finishRace();
         }
+    });
 
-        // Aniqlik (Accuracy)
+    function updateAccuracy() {
         if (totalKeystrokes > 0) {
             let acc = Math.round(((totalKeystrokes - totalMistakes) / totalKeystrokes) * 100);
             accShow.innerText = acc < 0 ? 0 : acc;
         }
-
-        // O'yin tugashi
-        if (inputField.value === originalText) {
-            finishRace();
-        }
-    });
+    }
 
     function updateTimer() {
         const timePassed = Math.round((new Date() - startTime) / 1000);
@@ -154,7 +166,6 @@
         .then(res => res.json())
         .then(data => {
             if (data.is_new_record === true) {
-                // 1. REKORD YANGILANSA
                 resultBoxCard.style.border = "2px solid #198754";
                 resultStatusTitle.innerText = "🔥 REKORD YANGILANDI!";
                 resultStatusTitle.className = "fw-bold mb-2 text-success fs-3";
@@ -170,7 +181,6 @@
                     </a>
                 `;
             } else {
-                // 2. REKORD YANGILANMASA
                 resultBoxCard.style.border = "2px solid #ffc107";
                 resultStatusTitle.innerText = "Yana o'ynaysizmi?";
                 resultStatusTitle.className = "fw-bold mb-2 text-warning fs-3";
