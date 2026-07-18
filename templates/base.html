@@ -1,107 +1,203 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartHub AI</title>
+<div class="widget-chat-container">
+    <button class="widget-chat-toggle-btn" id="widgetChatToggle">
+        <i class="fa-solid fa-comments"></i>
+        <span class="widget-badge">1</span>
+    </button>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <div class="widget-chat-box" id="widgetChatBox">
+        <div class="widget-chat-header">
+            <div class="d-flex align-items-center gap-2">
+                <div class="widget-avatar">AH</div>
+                <div>
+                    <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Abdujalil Habibullayev</h6>
+                    <small class="text-success" style="font-size: 0.7rem;">• onlayn</small>
+                </div>
+            </div>
+            <button class="widget-close-btn" id="widgetChatClose">&times;</button>
+        </div>
 
-    <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#00f2fe">
+        <div class="widget-chat-body">
+            <div class="widget-msg incoming">
+                <div class="widget-msg-text">telegramga kiring</div>
+                <div class="widget-msg-time">11:20</div>
+            </div>
+            <div class="widget-msg outgoing">
+                <div class="widget-msg-text">hozir, loyihani tugatyapman</div>
+                <div class="widget-msg-time">11:21</div>
+            </div>
+            <div class="widget-msg incoming">
+                <div class="widget-msg-text">o'yindan chiqing unda 😂</div>
+                <div class="widget-msg-time">11:21</div>
+            </div>
+        </div>
 
-    <style>
-        body {
-            background-color: #0b0e14;
-            color: #ffffff;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        main {
-            flex: 1;
-        }
-        .navbar-custom {
-            background-color: #121824 !important;
-            border-bottom: 1px solid rgba(0, 242, 254, 0.1);
-        }
-        /* Navbardagi faol bo'lmagan linklar rangini oqroq qilish */
-        .navbar-custom .nav-link {
-            color: rgba(255, 255, 255, 0.75) !important;
-            transition: color 0.2s ease;
-        }
-        .navbar-custom .nav-link:hover {
-            color: #00f2fe !important;
-        }
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0b0e14;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1c2333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00f2fe;
-        }
-    </style>
-</head>
-<body>
+        <div class="widget-chat-footer">
+            <input type="text" placeholder="Kabar yozing..." id="widgetChatInput">
+            <button id="widgetSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
 
-    {% include 'includes/navbar.html' %}
+<style>
+    .widget-chat-container {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 99999 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .widget-chat-toggle-btn {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+        position: relative;
+        transition: transform 0.2s;
+    }
+    .widget-chat-toggle-btn:hover {
+        transform: scale(1.05);
+    }
+    .widget-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background-color: #ff4757;
+        color: white;
+        font-size: 0.75rem;
+        padding: 3px 7px;
+        border-radius: 50%;
+        font-weight: bold;
+    }
+    .widget-chat-box {
+        position: absolute;
+        bottom: 75px;
+        right: 0;
+        width: 360px;
+        height: 480px;
+        background-color: #161c2a;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        display: none; /* Dastlab yopiq */
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .widget-chat-box.show {
+        display: flex;
+    }
+    .widget-chat-header {
+        background-color: #0f131f;
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .widget-avatar {
+        width: 38px;
+        height: 38px;
+        background-color: #2b5278;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 0.85rem;
+    }
+    .widget-close-btn {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+    .widget-close-btn:hover { opacity: 1; }
+    .widget-chat-body {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background-color: #0f131f;
+        display: flex;
+        flex-column: column;
+        gap: 10px;
+    }
+    .widget-msg {
+        max-width: 75%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        position: relative;
+        color: white;
+        margin-bottom: 5px;
+    }
+    .widget-msg.incoming {
+        background-color: #161c2a;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+    }
+    .widget-msg.outgoing {
+        background-color: #2b5278;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+        margin-left: auto;
+    }
+    .widget-msg-time {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.4);
+        text-align: right;
+        margin-top: 3px;
+    }
+    .widget-chat-footer {
+        padding: 10px 15px;
+        background-color: #161c2a;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .widget-chat-footer input {
+        flex-grow: 1;
+        background-color: #0f131f;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 20px;
+        color: white;
+        font-size: 0.85rem;
+        outline: none;
+    }
+    .widget-chat-footer button {
+        background: none;
+        border: none;
+        color: #00f2fe;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+</style>
 
-    <main class="py-4">
-        {% block content %}
-        {% endblock %}
-    </main>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("widgetChatToggle");
+        const closeBtn = document.getElementById("widgetChatClose");
+        const chatBox = document.getElementById("widgetChatBox");
 
-    {% include 'includes/footer.html' %}
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register("{% static 'sw.js' %}")
-                    .then(reg => console.log('SmartHub Service Worker faol!'))
-                    .catch(err => console.error('Service Workerda xatolik:', err));
+        if(toggleBtn && chatBox) {
+            // Tugma bosilganda oynani ochish/yopish
+            toggleBtn.addEventListener("click", function() {
+                chatBox.classList.toggle("show");
             });
-        }
 
-        let deferredPrompt;
-        const installBtn = document.getElementById('installApp');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (installBtn) {
-                installBtn.style.setProperty('display', 'inline-flex', 'important');
-            }
-        });
-
-        if (installBtn) {
-            installBtn.addEventListener('click', () => {
-                installBtn.style.display = 'none';
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Foydalanuvchi ilovani o\'rnatdi.');
-                    }
-                    deferredPrompt = null;
+            // (X) yopish tugmasi
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function() {
+                    chatBox.classList.remove("show");
                 });
-            });
-        }
-
-        window.addEventListener('appinstalled', () => {
-            if (installBtn) {
-                installBtn.style.display = 'none';
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
