@@ -7,13 +7,15 @@ import json
 from barcode.writer import ImageWriter
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Max
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from PIL import Image, ImageOps
-from .models import ChatSession, ChatMessage, TypingResult
+
+# HUDUDIY MODELLAR IMPORTI (Barcha modellar bir joyda xatoliksiz birlashtirildi)
+from .models import ChatSession, ChatMessage, TypingResult, UserProfile
 
 
 # ==========================================
@@ -88,12 +90,15 @@ def barcode_generator(request):
     })
 
 
-# 5. AI Chatbot (LIMIT VA PREMIUM BILAN YANGILANGAN VERSIYASI)
+# 5. AI Chatbot (LIMIT VA PREMIUM MANTIQI TO'LIQ INTEGRATSIYA QILINGAN)
 @login_required(login_url='login')
 def ai_chat(request):
     user = request.user
-    sessions = ChatSession.objects.filter(user=user)
 
+    # Foydalanuvchi profilini olamiz (yoki yaratamiz)
+    profile, created = UserProfile.objects.get_or_create(user=user)
+
+    sessions = ChatSession.objects.filter(user=user)
     session_id = request.GET.get('session_id')
     active_session = None
 
@@ -110,16 +115,19 @@ def ai_chat(request):
                 text="Salom! Men SmartHub AI yordamchisiman. Bugun sizga qanday yordam bera olaman? 🧠"
             )
 
-    # SHU YERDA CHEKLOV MANTIQI BOSHLANADI:
-    # Foydalanuvchi yuborgan (sender="user") xabarlar sonini sanaymiz
+    # Xabarlar sonini hisoblaymiz
     user_messages_count = active_session.messages.filter(sender="user").count()
-    CHAT_LIMIT = 5  # Bitta suhbat uchun xabarlar limiti
-    limit_reached = user_messages_count >= CHAT_LIMIT
+    CHAT_LIMIT = 5
+
+    # Premium foydalanuvchilar cheklovdan ozod qilinadi
+    if profile.is_premium:
+        limit_reached = False
+    else:
+        limit_reached = user_messages_count >= CHAT_LIMIT
 
     if request.method == 'POST':
         user_message = request.POST.get('message', '').strip()
 
-        # Yangi suhbat ochish tugmasi bosilganda
         if 'new_chat' in request.POST:
             active_session = ChatSession.objects.create(user=user, title="Yangi suhbat 🧠")
             ChatMessage.objects.create(
@@ -129,27 +137,25 @@ def ai_chat(request):
             )
             return redirect(f'/ai-chat/?session_id={active_session.id}')
 
-        # Agar limit tugagan bo'lsa va foydalanuvchi yana xabar yozmoqchi bo'lsa, xabarni saqlamaymiz
         if limit_reached:
             return render(request, 'core/ai_chat.html', {
                 'sessions': ChatSession.objects.filter(user=user),
                 'active_session': active_session,
                 'chat_history': active_session.messages.all(),
                 'limit_reached': True,
-                'chat_limit': CHAT_LIMIT
+                'chat_limit': CHAT_LIMIT,
+                'is_premium': profile.is_premium
             })
 
         if user_message:
-            # Xabarni saqlash
             ChatMessage.objects.create(session=active_session, sender="user", text=user_message)
 
-            # Sarlavhani avtomatik o'zgartirish
             if active_session.title.startswith("Yangi suhbat"):
                 truncated_title = user_message[:25] + "..." if len(user_message) > 25 else user_message
                 active_session.title = truncated_title
                 active_session.save()
 
-            # AI javob logikasi
+            # Sun'iy aqlli javoblar mantiqi
             msg_lower = user_message.lower()
             if "salom" in msg_lower or "assalom" in msg_lower:
                 ai_response = random.choice([
@@ -169,9 +175,11 @@ def ai_chat(request):
 
             ChatMessage.objects.create(session=active_session, sender="ai", text=ai_response)
 
-            # Xabar yuborilgandan keyin hisoblagichni yangilaymiz
             user_messages_count = active_session.messages.filter(sender="user").count()
-            limit_reached = user_messages_count >= CHAT_LIMIT
+            if profile.is_premium:
+                limit_reached = False
+            else:
+                limit_reached = user_messages_count >= CHAT_LIMIT
 
     return render(request, 'core/ai_chat.html', {
         'sessions': sessions,
@@ -179,7 +187,8 @@ def ai_chat(request):
         'chat_history': active_session.messages.all() if active_session else [],
         'limit_reached': limit_reached,
         'chat_limit': CHAT_LIMIT,
-        'user_messages_count': user_messages_count
+        'user_messages_count': user_messages_count,
+        'is_premium': profile.is_premium
     })
 
 
@@ -270,7 +279,9 @@ def image_tools(request):
 TEXT_POOL = [
     "Dasturlashni o'rganish sabr va tinimsiz mehnat talab qiladi. Har kuni ozgina bo'lsa ham kod yozing.",
     "Python juda sodda va tushunarli dasturlash tili bo'lib, u sun'iy intellekt sohasida keng qo'llaniladi.",
-    "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir."
+    "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir.",
+    "JavaScript — bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar (masalan: tugmalarni bosganda animatsiyalar chiqishi, sahifani yangilamasdan ma'lumotlarni yuklash) qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
+    "Python – bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
 ]
 
 
@@ -310,110 +321,11 @@ def save_race_result(request):
     return JsonResponse({'status': 'error'}, status=400)
 
 
-@login_required(login_url='login')
-def ai_chat(request):
-    user = request.user
-
-    # Foydalanuvchi profilini tekshiramiz (Premium yoki yo'qligini bilish uchun)
-    # Agar profil hali yaratilmagan bo'lsa, avtomatik yaratib ketadi
-    profile, created = UserProfile.objects.get_or_create(user=user)
-
-    sessions = ChatSession.objects.filter(user=user)
-    session_id = request.GET.get('session_id')
-    active_session = None
-
-    if session_id:
-        active_session = ChatSession.objects.filter(id=session_id, user=user).first()
-
-    if not active_session:
-        active_session = sessions.first()
-        if not active_session:
-            active_session = ChatSession.objects.create(user=user, title="Yangi suhbat 🧠")
-            ChatMessage.objects.create(
-                session=active_session,
-                sender="ai",
-                text="Salom! Men SmartHub AI yordamchisiman. Bugun sizga qanday yordam bera olaman? 🧠"
-            )
-
-    # Xabarlar sonini hisoblaymiz
-    user_messages_count = active_session.messages.filter(sender="user").count()
-    CHAT_LIMIT = 5
-
-    # AGAR FOYDALANUVCHI PREMIUM BO'LSA - LIMIT HECH QACHON TUGAMAYDI!
-    if profile.is_premium:
-        limit_reached = False
-    else:
-        limit_reached = user_messages_count >= CHAT_LIMIT
-
-    if request.method == 'POST':
-        user_message = request.POST.get('message', '').strip()
-
-        if 'new_chat' in request.POST:
-            active_session = ChatSession.objects.create(user=user, title="Yangi suhbat 🧠")
-            ChatMessage.objects.create(
-                session=active_session,
-                sender="ai",
-                text="Salom! Men yangi suhbatga tayyorman. Savolingizni bering! 🧠"
-            )
-            return redirect(f'/ai-chat/?session_id={active_session.id}')
-
-        if limit_reached:
-            return render(request, 'core/ai_chat.html', {
-                'sessions': ChatSession.objects.filter(user=user),
-                'active_session': active_session,
-                'chat_history': active_session.messages.all(),
-                'limit_reached': True,
-                'chat_limit': CHAT_LIMIT,
-                'is_premium': profile.is_premium
-            })
-
-        if user_message:
-            ChatMessage.objects.create(session=active_session, sender="user", text=user_message)
-
-            if active_session.title.startswith("Yangi suhbat"):
-                truncated_title = user_message[:25] + "..." if len(user_message) > 25 else user_message
-                active_session.title = truncated_title
-                active_session.save()
-
-            # Sun'iy javoblar...
-            msg_lower = user_message.lower()
-            if "salom" in msg_lower or "assalom" in msg_lower:
-                ai_response = "Vaalaykum assalom! Kuningiz xayrli o'tsin! 😊"
-            elif "ism" in msg_lower:
-                ai_response = "Mening ismim SmartHub AI. 🤖"
-            else:
-                ai_response = f"Siz '{user_message}' deb yozdingiz. Men hali o'rganish jarayonidaman! 😉"
-
-            ChatMessage.objects.create(session=active_session, sender="ai", text=ai_response)
-
-            user_messages_count = active_session.messages.filter(sender="user").count()
-            if profile.is_premium:
-                limit_reached = False
-            else:
-                limit_reached = user_messages_count >= CHAT_LIMIT
-
-    return render(request, 'core/ai_chat.html', {
-        'sessions': sessions,
-        'active_session': active_session,
-        'chat_history': active_session.messages.all() if active_session else [],
-        'limit_reached': limit_reached,
-        'chat_limit': CHAT_LIMIT,
-        'user_messages_count': user_messages_count,
-        'is_premium': profile.is_premium  # Shablonda yulduzcha chiqarish uchun
-    })
-
-
-from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
-
-
+# 8. TIZIM FOYDALANUVCHILARI RO'YXATI (FAQAT ADMIN KO'RA OLADI)
 @login_required(login_url='login')
 def user_activity_list(request):
-    # Agar kirgan odam admin bo'lmasa, kirishni taqiqlaymiz
     if not request.user.is_staff:
         return HttpResponseForbidden("Sizda bu sahifani ko'rish huquqi yo'q!")
 
-    # Barcha foydalanuvchilarni oxirgi kirgan vaqti bo'yicha saralab olamiz
     all_users = User.objects.all().order_by('-last_login')
-
     return render(request, 'core/user_list.html', {'all_users': all_users})

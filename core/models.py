@@ -37,20 +37,18 @@ class TypingResult(models.Model):
         return f"{self.user.username} - {self.wpm} WPM"
 
 
-    class Leaderboard(models.Model):
-        user = models.OneToOneField(User,
-                                    on_delete=models.CASCADE)  # OneToOneField bitta odamga faqat 1 ta qator ochishga majburlaydi
-        wpm = models.IntegerField(default=0)
-        accuracy = models.IntegerField(default=0)
-        date = models.DateTimeField(auto_now=True)  # Har safar yangilansa, vaqt avtomat o'zgaradi
+# XATO TO'G'RILANDI: Leaderboard endi TypingResult ichida emas, alohida model bo'ldi
+class Leaderboard(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOneField bitta odamga faqat 1 ta qator ochishga majburlaydi
+    wpm = models.IntegerField(default=0)
+    accuracy = models.IntegerField(default=0)
+    date = models.DateTimeField(auto_now=True)  # Har safar yangilansa, vaqt avtomat o'zgaradi
 
-        def __str__(self):
-            return f"{self.user.username} - {self.wpm} WPM"
+    def __str__(self):
+        return f"{self.user.username} - {self.wpm} WPM"
 
 
-from django.db import models
-from django.contrib.auth.models import User
-
+# XATO TO'G'RILANDI: Takroriy importlar olib tashlandi
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     is_premium = models.BooleanField(default=False)  # True bo'lsa - cheksiz yozadi, False bo'lsa - limitli
