@@ -1,203 +1,272 @@
-<div class="widget-chat-container">
-    <button class="widget-chat-toggle-btn" id="widgetChatToggle">
-        <i class="fa-solid fa-comments"></i>
-        <span class="widget-badge">1</span>
-    </button>
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <div class="widget-chat-box" id="widgetChatBox">
-        <div class="widget-chat-header">
-            <div class="d-flex align-items-center gap-2">
-                <div class="widget-avatar">AH</div>
-                <div>
-                    <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Abdujalil Habibullayev</h6>
-                    <small class="text-success" style="font-size: 0.7rem;">• onlayn</small>
+    <style>
+        body {
+            background-color: #0f131f;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background-color: #121824;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+        }
+        .nav-link {
+            color: #a0aec0 !important;
+            transition: color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #00f2fe !important;
+        }
+        /* Telegram uslubidagi dumaloq avatar */
+        .profile-avatar-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #0f131f;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+            transition: transform 0.2s;
+        }
+        .profile-avatar-circle:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-2 mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="{% url 'home' %}">
+                🚀 SmartHub
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'home' %}">Bosh sahifa</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'tools_home' %}">Asboblar paneli</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'ai_chat' %}">AI</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'pdf_tools' %}">PDF</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'image_tools' %}">Image Tools</a></li>
+                    <li class="nav-item"><a class="nav-link px-3 fw-semibold" href="{% url 'race_arena' %}">⌨️ Tez yozar</a></li>
+                </ul>
+
+                {% if user.is_authenticated %}
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <div class="d-flex align-items-center gap-2" id="profileToggleTrigger" style="cursor: pointer;">
+                        <div class="profile-avatar-circle">
+                            {{ user.username|slice:":2"|upper }}
+                        </div>
+                        <span class="text-info fw-medium d-none d-sm-inline">@{{ user.username }}</span>
+                    </div>
+
+                    <form action="{% url 'logout' %}" method="POST" class="m-0 d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger px-2.5 py-1 rounded-pill" style="font-size: 0.8rem;">
+                            Chiqish
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <div class="widget-chat-container">
+        <button class="widget-chat-toggle-btn" id="widgetChatToggle">
+            <i class="fa-solid fa-comments"></i>
+            <span class="widget-badge">1</span>
+        </button>
+
+        <div class="widget-chat-box" id="widgetChatBox">
+            <div class="widget-chat-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="widget-avatar">AH</div>
+                    <div>
+                        <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Abdujalil Habibullayev</h6>
+                        <small class="text-success" style="font-size: 0.7rem;">• onlayn</small>
+                    </div>
+                </div>
+                <button class="widget-close-btn" id="widgetChatClose">&times;</button>
+            </div>
+
+            <div class="widget-chat-body">
+                <div class="widget-msg incoming">
+                    <div class="widget-msg-text">telegramga kiring</div>
+                    <div class="widget-msg-time">11:20</div>
+                </div>
+                <div class="widget-msg outgoing">
+                    <div class="widget-msg-text">hozir, loyihani tugatyapman</div>
+                    <div class="widget-msg-time">11:21</div>
+                </div>
+                <div class="widget-msg incoming">
+                    <div class="widget-msg-text">o'yindan chiqing unda 😂</div>
+                    <div class="widget-msg-time">11:21</div>
                 </div>
             </div>
-            <button class="widget-close-btn" id="widgetChatClose">&times;</button>
-        </div>
 
-        <div class="widget-chat-body">
-            <div class="widget-msg incoming">
-                <div class="widget-msg-text">telegramga kiring</div>
-                <div class="widget-msg-time">11:20</div>
+            <div class="widget-chat-footer">
+                <input type="text" placeholder="Xabar yozing..." id="widgetChatInput">
+                <button id="widgetSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
-            <div class="widget-msg outgoing">
-                <div class="widget-msg-text">hozir, loyihani tugatyapman</div>
-                <div class="widget-msg-time">11:21</div>
-            </div>
-            <div class="widget-msg incoming">
-                <div class="widget-msg-text">o'yindan chiqing unda 😂</div>
-                <div class="widget-msg-time">11:21</div>
-            </div>
-        </div>
-
-        <div class="widget-chat-footer">
-            <input type="text" placeholder="Kabar yozing..." id="widgetChatInput">
-            <button id="widgetSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
-</div>
 
-<style>
-    .widget-chat-container {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        z-index: 99999 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .widget-chat-toggle-btn {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #00f2fe, #4facfe);
-        border: none;
-        border-radius: 50%;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
-        position: relative;
-        transition: transform 0.2s;
-    }
-    .widget-chat-toggle-btn:hover {
-        transform: scale(1.05);
-    }
-    .widget-badge {
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        background-color: #ff4757;
-        color: white;
-        font-size: 0.75rem;
-        padding: 3px 7px;
-        border-radius: 50%;
-        font-weight: bold;
-    }
-    .widget-chat-box {
-        position: absolute;
-        bottom: 75px;
-        right: 0;
-        width: 360px;
-        height: 480px;
-        background-color: #161c2a;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        border: 1px solid rgba(255,255,255,0.1);
-        display: none; /* Dastlab yopiq */
-        flex-direction: column;
-        overflow: hidden;
-    }
-    .widget-chat-box.show {
-        display: flex;
-    }
-    .widget-chat-header {
-        background-color: #0f131f;
-        padding: 12px 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .widget-avatar {
-        width: 38px;
-        height: 38px;
-        background-color: #2b5278;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: white;
-        font-size: 0.85rem;
-    }
-    .widget-close-btn {
-        background: none;
-        border: none;
-        color: #fff;
-        font-size: 1.5rem;
-        cursor: pointer;
-        opacity: 0.6;
-    }
-    .widget-close-btn:hover { opacity: 1; }
-    .widget-chat-body {
-        flex-grow: 1;
-        padding: 15px;
-        overflow-y: auto;
-        background-color: #0f131f;
-        display: flex;
-        flex-column: column;
-        gap: 10px;
-    }
-    .widget-msg {
-        max-width: 75%;
-        padding: 8px 12px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        position: relative;
-        color: white;
-        margin-bottom: 5px;
-    }
-    .widget-msg.incoming {
-        background-color: #161c2a;
-        align-self: flex-start;
-        border-bottom-left-radius: 4px;
-    }
-    .widget-msg.outgoing {
-        background-color: #2b5278;
-        align-self: flex-end;
-        border-bottom-right-radius: 4px;
-        margin-left: auto;
-    }
-    .widget-msg-time {
-        font-size: 0.65rem;
-        color: rgba(255,255,255,0.4);
-        text-align: right;
-        margin-top: 3px;
-    }
-    .widget-chat-footer {
-        padding: 10px 15px;
-        background-color: #161c2a;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    .widget-chat-footer input {
-        flex-grow: 1;
-        background-color: #0f131f;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 20px;
-        color: white;
-        font-size: 0.85rem;
-        outline: none;
-    }
-    .widget-chat-footer button {
-        background: none;
-        border: none;
-        color: #00f2fe;
-        font-size: 1.2rem;
-        cursor: pointer;
-    }
-</style>
+    <style>
+        .widget-chat-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 99999 !important;
+        }
+        .widget-chat-toggle-btn {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.35rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .widget-chat-toggle-btn:hover { transform: scale(1.05); }
+        .widget-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .widget-chat-box {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 340px;
+            height: 450px;
+            background-color: #161c2a;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .widget-chat-box.show { display: flex; }
+        .widget-chat-header {
+            background-color: #0f131f;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .widget-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: #2b5278;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .widget-close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .widget-chat-body {
+            flex-grow: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background-color: #0f131f;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .widget-msg {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            color: white;
+        }
+        .widget-msg.incoming { background-color: #161c2a; align-self: flex-start; }
+        .widget-msg.outgoing { background-color: #2b5278; align-self: flex-end; margin-left: auto; }
+        .widget-msg-time { font-size: 0.6rem; color: rgba(255,255,255,0.3); text-align: right; margin-top: 2px; }
+        .widget-chat-footer { padding: 10px; background-color: #161c2a; display: flex; gap: 8px; }
+        .widget-chat-footer input {
+            flex-grow: 1;
+            background-color: #0f131f;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.82rem;
+            outline: none;
+        }
+        .widget-chat-footer button { background: none; border: none; color: #00f2fe; cursor: pointer; }
+    </style>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const toggleBtn = document.getElementById("widgetChatToggle");
-        const closeBtn = document.getElementById("widgetChatClose");
-        const chatBox = document.getElementById("widgetChatBox");
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        if(toggleBtn && chatBox) {
-            // Tugma bosilganda oynani ochish/yopish
-            toggleBtn.addEventListener("click", function() {
-                chatBox.classList.toggle("show");
-            });
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("widgetChatToggle");
+            const closeBtn = document.getElementById("widgetChatClose");
+            const chatBox = document.getElementById("widgetChatBox");
+            const profileTrigger = document.getElementById("profileToggleTrigger");
 
-            // (X) yopish tugmasi
-            if(closeBtn) {
-                closeBtn.addEventListener("click", function() {
-                    chatBox.classList.remove("show");
+            if(toggleBtn && chatBox) {
+                toggleBtn.addEventListener("click", function() {
+                    chatBox.classList.toggle("show");
+                });
+                if(closeBtn) {
+                    closeBtn.addEventListener("click", function() {
+                        chatBox.classList.remove("show");
+                    });
+                }
+            }
+
+            if (profileTrigger && chatBox) {
+                profileTrigger.addEventListener("click", function() {
+                    chatBox.classList.toggle("show");
                 });
             }
-        }
-    });
-</script>
+        });
+    </script>
+</body>
+</html>
