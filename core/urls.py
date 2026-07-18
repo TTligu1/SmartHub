@@ -25,9 +25,10 @@ urlpatterns = [
     path('chat/', views.user_chat_room, name='user_chat_room'),
 
     # 📍 QO'SHILDI: Telegram Chat tizimi uchun API yo'nalishlari
-    path('api/chat-users/', views.get_chat_users, name='get_chat_users'),
-    path('api/get-messages/', views.get_messages, name='get_messages'),
-    path('api/send-message/', views.send_message, name='send_message'),
+    path('chat/', views.user_chat_room, name='user_chat_room'),
+    path('chat/api/users/', views.get_chat_users, name='get_chat_users'),
+    path('chat/api/messages/', views.get_messages, name='get_messages'),
+    path('chat/api/send/', views.send_message, name='send_message'),
 
     # 💡 QO'SHILDI: Shablonlarda eski qolib ketgan tools_list bo'lsa xato bermasligi uchun dublyaj yo'nalish
     path('tools/list/', views.tools_home, name='tools_list'),

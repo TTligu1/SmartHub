@@ -1,97 +1,44 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container mt-5 position-relative">
-
-    <div class="position-absolute" style="top: -20px; left: 15px;">
-        <a href="{% url 'tools_home' %}" class="btn btn-outline-secondary px-3 py-2 rounded-pill fw-bold btn-sm shadow-sm">
-            <i class="fa-solid fa-arrow-left me-1"></i> Panelga qaytish
-        </a>
-    </div>
-
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-10">
-            <div class="card shadow border-0" style="background-color: #121824; border-radius: 20px; height: 75vh; overflow: hidden; border: 1px solid rgba(0, 242, 254, 0.15);">
-
-                <div class="card-header d-flex align-items-center justify-content-between px-4 py-3" style="background-color: #1a2234; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow" style="width: 45px; height: 45px;">
-                            <i class="fa-solid fa-paper-plane fs-5"></i>
-                        </div>
-                        <div>
-                            <h5 id="active-chat-title" class="text-white fw-bold m-0">Umumiy Chat</h5>
-                            <small class="text-success" id="chat-status-sub">Hamma shu yerda yozishadi</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-0 h-100" style="margin-top: -1px;">
-
-                    <div class="col-md-4 border-end" style="border-color: rgba(255,255,255,0.05) !important; background-color: #161f30; max-height: calc(75vh - 70px); overflow-y: auto;">
-                        <div class="list-group list-group-flush" id="users-list-group">
-                            <button onclick="switchChat('general', null, 'Umumiy Chat')" class="list-group-item list-group-item-action border-0 px-4 py-3 text-white active-chat-item" style="background-color: rgba(0, 242, 254, 0.1); border-left: 4px solid #00f2fe;">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                        <i class="fa-solid fa-users"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold">Umumiy Chat</div>
-                                        <small class="text-muted">Hamma ko'ra oladi</small>
-                                    </div>
-                                </div>
-                            </button>
-                            </div>
-                    </div>
-
-                    # O'ng panel: Xabarlar maydoni
-                    <div class="col-md-8 d-flex flex-column justify-content-between" style="background-color: #121824; max-height: calc(75vh - 70px);">
-
-                        <div id="chat-messages-box" class="p-4 flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
-                            <div class="text-center text-muted my-auto">Yuklanmoqda...</div>
-                        </div>
-
-                        <div class="p-3" style="background-color: #161f30; border-top: 1px solid rgba(255,255,255,0.05);">
-                            <form id="chat-message-form" onsubmit="sendMessage(event)" class="d-flex gap-2">
-                                <input type="text" id="chat-input-field" class="form-control border-0 text-white px-4 py-3" placeholder="Xabar yozing..." style="background-color: #1e293b; border-radius: 30px;" autocomplete="off">
-                                <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center shadow" style="border-radius: 50%; width: 50px; height: 50px;">
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     let currentChatType = 'general';
     let currentActiveUserId = null;
     const currentUsername = "{{ request.user.username }}";
 
-    // Sahifa yuklanganda ishga tushadigan qism
     document.addEventListener("DOMContentLoaded", () => {
         loadUsers();
         loadMessages();
-        // Har 3 soniyada yangi xabarlarni avtomatik tekshirib turish (Polling)
+        // Har 3 soniyada xabarlarni avtomatik yangilash
         setInterval(loadMessages, 3000);
     });
 
-    // Foydalanuvchilar ro'yxatini yuklash
+    // Foydalanuvchilar ro'yxatini yuklash (Mutloq statik yo'nalish bilan)
     function loadUsers() {
-        fetch("{% url 'get_chat_users' %}")
-            .then(res => res.json())
+        fetch("/chat/api/users/")
+            .then(res => {
+                if (!res.ok) throw new Error("Tarmoq xatosi");
+                return res.json();
+            })
             .then(data => {
                 const container = document.getElementById('users-list-group');
+                // Takrorlanishning oldini olish uchun tozalaymiz
+                container.innerHTML = `
+                    <button onclick="switchChat('general', null, 'Umumiy Chat')" class="list-group-item list-group-item-action border-0 px-4 py-3 text-white active-chat-item" style="background-color: rgba(0, 242, 254, 0.1); border-left: 4px solid #00f2fe;">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Umumiy Chat</div>
+                                <small class="text-muted">Hamma ko'ra oladi</small>
+                            </div>
+                        </div>
+                    </button>
+                `;
+
                 data.users.forEach(user => {
                     const btn = document.createElement('button');
                     btn.className = "list-group-item list-group-item-action border-0 px-4 py-3 text-white-50 bg-transparent user-chat-btn-item";
                     btn.style.transition = "all 0.2s ease";
-                    btn.onclick = () => switchChat('private', user.id, `@${user.username}`);
+                    btn.onclick = (e) => switchChat('private', user.id, `@${user.username}`, e);
                     btn.innerHTML = `
                         <div class="d-flex align-items-center">
                             <div class="bg-dark border border-secondary rounded-circle d-flex align-items-center justify-content-center text-info fw-bold me-3" style="width: 40px; height: 40px;">
@@ -105,12 +52,13 @@
                     `;
                     container.appendChild(btn);
                 });
-            });
+            })
+            .catch(err => console.error("Foydalanuvchilarni yuklashda xatolik:", err));
     }
 
-    // Xabarlarni serverdan tortib kelish
+    // Xabarlarni yuklash (Mutloq statik yo'nalish bilan)
     function loadMessages() {
-        let url = `{% url 'get_messages' %}?type=${currentChatType}`;
+        let url = `/chat/api/messages/?type=${currentChatType}`;
         if (currentChatType === 'private') {
             url += `&user_id=${currentActiveUserId}`;
         }
@@ -121,7 +69,7 @@
                 const box = document.getElementById('chat-messages-box');
                 const wasAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
 
-                if(data.messages.length === 0) {
+                if(!data.messages || data.messages.length === 0) {
                     box.innerHTML = `<div class="text-center text-muted my-auto">Bu yerda hozircha xabarlar yo'q. Birinchi bo'lib yozing!</div>`;
                     return;
                 }
@@ -144,32 +92,34 @@
                 if (wasAtBottom) {
                     box.scrollTop = box.scrollHeight;
                 }
-            });
+            })
+            .catch(err => console.error("Xabarlarni yuklashda xatolik:", err));
     }
 
-    // Chatlar orasida almashish (Umumiy <-> Shaxsiy)
-    function switchChat(type, userId, title) {
+    // Chatni almashtirish
+    function switchChat(type, userId, title, event) {
         currentChatType = type;
         currentActiveUserId = userId;
 
         document.getElementById('active-chat-title').innerText = title;
         document.getElementById('chat-status-sub').innerText = type === 'general' ? 'Hamma shu yerda yozishadi' : 'Xavfsiz shaxsiy yozishmalar';
 
-        // Aktivlik vizual borderini to'g'rilash
         document.querySelectorAll('.list-group-item').forEach(el => {
             el.style.backgroundColor = 'transparent';
             el.style.borderLeft = 'none';
         });
 
-        const activeBtn = event.currentTarget;
-        activeBtn.style.backgroundColor = 'rgba(0, 242, 254, 0.1)';
-        activeBtn.style.borderLeft = '4px solid #00f2fe';
+        const activeBtn = event ? event.currentTarget : document.querySelector('.list-group-item');
+        if (activeBtn) {
+            activeBtn.style.backgroundColor = 'rgba(0, 242, 254, 0.1)';
+            activeBtn.style.borderLeft = '4px solid #00f2fe';
+        }
 
         document.getElementById('chat-messages-box').innerHTML = `<div class="text-center text-muted my-auto">Yuklanmoqda...</div>`;
         loadMessages();
     }
 
-    // Xabar yuborish
+    // Xabar yuborish (Mutloq statik yo'nalish bilan)
     function sendMessage(e) {
         e.preventDefault();
         const input = document.getElementById('chat-input-field');
@@ -181,7 +131,7 @@
             bodyData.user_id = currentActiveUserId;
         }
 
-        fetch("{% url 'send_message' %}", {
+        fetch("/chat/api/send/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -199,20 +149,7 @@
                     box.scrollTop = box.scrollHeight;
                 }, 100);
             }
-        });
+        })
+        .catch(err => console.error("Xabar yuborishda xatolik:", err));
     }
 </script>
-
-<style>
-    #chat-messages-box::-webkit-scrollbar, .col-md-4::-webkit-scrollbar {
-        width: 6px;
-    }
-    #chat-messages-box::-webkit-scrollbar-thumb, .col-md-4::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-    }
-    .user-chat-btn-item:hover {
-        background-color: rgba(255,255,255,0.02) !important;
-    }
-</style>
-{% endblock %}
