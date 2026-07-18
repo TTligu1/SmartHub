@@ -247,7 +247,7 @@ def image_tools(request):
                 elif action_type == 'compressor':
                     input_image.convert('RGB').save(output_buffer, format="JPEG", quality=30)
                     result_image = base64.b64encode(output_buffer.getvalue()).decode('utf-8')
-                    success_message = f"'{uploaded_image.name}' hajmi muvaffaqiyatli siqildi!"
+                    success_message = f"'{uploaded_image.name}' hajmi muvaffalarli siqildi!"
                     file_name = "smarthub_compressed.jpg"
 
                 elif action_type == 'crop':
@@ -280,7 +280,7 @@ TEXT_POOL = [
     "Dasturlashni o'rganish sabr va tinimsiz mehnat talab qiladi. Har kuni ozgina bo'lsa ham kod yozing.",
     "Python juda sodda va tushunarli dasturlash tili bo'lib, u sun'iy intellekt sohasida keng qo'llaniladi.",
     "Django loyihani tezkor va xavfsiz tarzda ishlab chiqish uchun eng mukammal veb freymvorklardan biridir.",
-    "JavaScript — bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar (masalan: tugmalarni bosganda animatsiyalar chiqishi, sahifani yangilamasdan ma'lumotlarni yuklash) qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
+    "JavaScript — bu veb-sahifalarni jonlantirish, ularga dinamik imkoniyatlar qo'shish uchun ishlatiladigan eng ommabop dasturlash tilidir.",
     "Python – bu dunyodagi eng ommabop, o‘rganishga oson va kuchli dasturlash tillaridan biri. U 1991-yilda Gvido van Rossum tomonidan yaratilgan."
 ]
 
@@ -332,7 +332,7 @@ def user_activity_list(request):
 
 
 # =========================================================================
-# 📍 9. MUKAMMAL TELEGRAM CHAT TIZIMI API LOGIKASI (YANGI MODELGA MOSLANDI)
+# 📍 9. MUKAMMAL TELEGRAM CHAT TIZIMI API LOGIKASI (JONLI TUNNEL SOZLANDI)
 # =========================================================================
 
 @login_required
@@ -348,11 +348,9 @@ def get_messages(request):
     chat_type = request.GET.get('type')  # 'general' yoki 'private'
 
     if chat_type == 'general':
-        # Receiver'i bo'lmagan xabarlar TelegramChatMessage ichidagi Umumiy chat hisoblanadi
         messages = TelegramChatMessage.objects.filter(receiver__isnull=True).order_by('timestamp')
     else:
         user_id = request.GET.get('user_id')
-        # Shaxsiy suhbatni filtrlash
         messages = TelegramChatMessage.objects.filter(
             (Q(sender=request.user, receiver_id=user_id)) |
             (Q(sender_id=user_id, receiver=request.user))
@@ -370,29 +368,45 @@ def get_messages(request):
 
 @login_required
 def send_message(request):
-    """ Yangi shaxsiy yoki umumiy telegram xabarini saqlash """
+    """ Yangi shaxsiy yoki umumiy telegram xabarini JSON/Formadan saqlash """
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            chat_type = data.get('type')
-            text = data.get('text')
+            text = ""
+            chat_type = 'general'
+            receiver_id = None
+
+            # 1. Agar so'rov JSON (JavaScript Fetch) orqali kelgan bo'lsa
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                chat_type = data.get('type', 'general')
+                text = data.get('text', '').strip()
+                receiver_id = data.get('user_id')
+            # 2. Agar so'rov an'anaviy HTML forma orqali yuborilgan bo'lsa
+            else:
+                text = request.POST.get('message', '').strip()
+                chat_type = request.GET.get('chat_type', 'general')
+                receiver_id = request.GET.get('user_id')
 
             if not text:
-                return JsonResponse({'status': 'error', 'message': 'Bo\'sh xabar yuborib bo\'lmaydi.'})
+                return JsonResponse({'status': 'error', 'message': 'Bo\'sh xabar yuborib bo\'lmaydi.'}, status=400)
 
-            # Bu yerda yangi TelegramChatMessage modelidan foydalaniladi
+            # Bazadagi modelga mos ravishda ma'lumotlarni yozamiz
             msg = TelegramChatMessage(sender=request.user, message_text=text)
 
-            if chat_type == 'private':
-                msg.receiver_id = data.get('user_id')
+            if chat_type == 'private' and receiver_id:
+                msg.receiver_id = receiver_id
 
             msg.save()
-            return JsonResponse({'status': 'success'})
+            return JsonResponse({
+                'status': 'success',
+                'sender': msg.sender.username,
+                'text': msg.message_text,
+                'time': msg.timestamp.strftime('%H:%M')
+            })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Faqat POST so\'rovlar ruxsat etilgan.'}, status=400)
-
 
 
 @login_required(login_url='login')
