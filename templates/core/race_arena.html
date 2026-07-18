@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 position-relative">
+
+    <div class="position-absolute" style="top: -20px; left: 15px;">
+        <a href="{% url 'tools_home' %}" class="btn btn-outline-secondary px-3 py-2 rounded-pill fw-bold btn-sm shadow-sm" style="transition: all 0.2s ease;">
+            <i class="fa-solid fa-arrow-left me-1"></i> Panelga qaytish
+        </a>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
 
-            <h3 class="mb-4 fw-bold text-white"><i class="fa-solid fa-keyboard text-warning me-2"></i> Tez yozish poygasi</h3>
+            <h3 class="mb-4 fw-bold text-white mt-4"><i class="fa-solid fa-keyboard text-warning me-2"></i> Tez yozish poygasi</h3>
 
             <div class="card p-4 mb-4" style="background-color: #121824; border: 1px solid rgba(0, 242, 254, 0.15); border-radius: 15px;">
                 <p id="text-to-type" class="fs-4 text-secondary tracking-wide select-none m-0" style="line-height: 1.6; letter-spacing: 0.5px; white-space: pre-wrap;"></p>
@@ -186,7 +193,6 @@
             resultContainer.classList.remove('d-none');
         })
         .catch(err => {
-            // Muammo chiqsa default blok yoqiladi
             resultBoxCard.style.border = "2px solid #dc3545";
             resultStatusTitle.innerText = "⚠️ Tizimda kichik xatolik";
             resultStatusTitle.className = "fw-bold mb-2 text-danger fs-3";
@@ -206,5 +212,9 @@
 <style>
     .tracking-wide span { transition: all 0.05s ease; }
     .select-none { user-select: none; }
+    .btn-outline-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
 </style>
 {% endblock %}
