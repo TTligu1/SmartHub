@@ -46,3 +46,14 @@ class TypingResult(models.Model):
 
         def __str__(self):
             return f"{self.user.username} - {self.wpm} WPM"
+
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    is_premium = models.BooleanField(default=False)  # True bo'lsa - cheksiz yozadi, False bo'lsa - limitli
+
+    def __str__(self):
+        return f"{self.user.username} - Premium: {self.is_premium}"

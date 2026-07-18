@@ -58,14 +58,32 @@
         border-radius: 8px;
         padding: 15px;
     }
+    .preview-box {
+        background-color: #0b0e14;
+        border: 1px dashed rgba(0, 242, 254, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        max-height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+    .preview-box img {
+        max-width: 100%;
+        max-height: 320px;
+        border-radius: 8px;
+        object-fit: contain;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
 </style>
 
-<div class="container" style="max-width: 600px; margin-top: 2rem;">
+<div class="container" style="max-width: 600px; margin-top: 2rem; margin-bottom: 3rem;">
     <div class="text-center mb-4">
         <h2 style="font-weight: 700; background: linear-gradient(to right, #ffffff, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             ✨ Image Tools
         </h2>
-        <p style="color: #a0aec0; font-size: 14px;">Rasmlarni siqish, fonini o'chirish va qirqish asbobi</p>
+        <p style="color: #a0aec0; font-size: 14px;">Rasmlarni siqish, effekt berish va qirqish asbobi</p>
     </div>
 
     {% if success_message %}
@@ -82,9 +100,12 @@
     <div class="image-tools-card">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <a href="{% url 'tools_home' %}" style="display: inline-block; padding: 6px 14px; font-size: 14px; color: white; background: linear-gradient(to right, #22d3ee, #3b82f6); border-radius: 5px; text-decoration: none; font-weight: 500;">
-                    Orqaga
+                    ← Orqaga
                 </a>
+            </div>
+
             <div class="mb-4">
                 <label for="image_file" class="form-label form-label-custom">Rasm yuklang:</label>
                 <input type="file" id="image_file" name="image_file" accept="image/*" required class="form-control input-custom">
@@ -93,25 +114,30 @@
             <div class="mb-4">
                 <label for="action_type" class="form-label form-label-custom">Bajariladigan amal:</label>
                 <select id="action_type" name="action_type" required class="form-select select-custom">
-                    <option value="bg_remover" style="background-color: #121824;">✨ BG Remover (Fonni olib tashlash)</option>
+                    <option value="bg_remover" style="background-color: #121824;">🎨 Rasmga oq-qora effekt berish</option>
                     <option value="compressor" style="background-color: #121824;">⛶ Image Compressor (Hajmini siqish)</option>
                     <option value="crop" style="background-color: #121824;">✂️ Resize & Crop (Qirqish va O'lcham)</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-submit-neon w-100 d-flex justify-content-center align-items-center gap-2">
+            <button type="submit" class="btn btn-submit-neon w-100 d-flex justify-content-center align-items-center gap-2 mb-3">
                 Bajarish ➔
             </button>
-        </form> {% if result_image %}
-            <div class="mt-4 pt-4 text-center" style="border-top: 1px solid rgba(0, 242, 254, 0.1);">
-                <p style="color: #a0aec0; font-size: 15px;">Natija muvaffaqiyatli tayyorlandi!</p>
+        </form>
 
-                <a href="data:image/png;base64,{{ result_image }}" download="{{ file_name }}" class="btn d-inline-flex align-items-center gap-2" style="background-color: #1c2333; color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none;">
+        {% if result_image %}
+            <div class="mt-4 pt-4 text-center" style="border-top: 1px solid rgba(0, 242, 254, 0.1);">
+                <p style="color: #a0aec0; font-size: 15px; font-weight: 500;">Natija muvaffaqiyatli tayyorlandi!</p>
+
+                <div class="preview-box mb-4">
+                    <img src="data:image/png;base64,{{ result_image }}" alt="SmartHub Image Result">
+                </div>
+
+                <a href="data:image/png;base64,{{ result_image }}" download="{{ file_name }}" class="btn d-inline-flex align-items-center gap-2" style="background-color: #1c2333; color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
                     <i class="fa-solid fa-download"></i> Yuklab olish
                 </a>
             </div>
         {% endif %}
-
-    </div> </div> {% endblock %}
-
-
+    </div>
+</div>
+{% endblock %}
