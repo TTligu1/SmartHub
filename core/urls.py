@@ -1,4 +1,6 @@
 from django.urls import path
+from django.views.generic import RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 from . import views
 
 urlpatterns = [
@@ -7,6 +9,8 @@ urlpatterns = [
     path('accounts/register/', views.register_view, name='register'),
     path('tools/', views.tools_home, name='tools_home'),
     path('ai-chat/', views.ai_chat, name='ai_chat'),
+    path('manifest.json', RedirectView.as_view(url=staticfiles_storage.url('manifest.json'))),
+    path('sw.js', RedirectView.as_view(url=staticfiles_storage.url('sw.js'))),
 
     # Mini asboblar (Generators & Tools)
     path('qr-generator/', views.qr_generator, name='qr_generator'),
