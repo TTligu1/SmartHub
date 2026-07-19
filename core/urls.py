@@ -36,4 +36,5 @@ urlpatterns = [
 
     # 💡 QO'SHILDI: Shablonlarda eski qolib ketgan tools_list bo'lsa xato bermasligi uchun dublyaj yo'nalish
     path('tools/list/', views.tools_home, name='tools_list'),
+    path('click-donation/', views.click_donation_view, name='click_donation'),
 ]

@@ -4,6 +4,7 @@ import random
 import qrcode
 import barcode
 import json
+import time  # 📍 Click vaqti uchun qo'shildi
 from barcode.writer import ImageWriter
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -43,6 +44,31 @@ def home(request):
 def tools_home(request):
     users_count = User.objects.count()
     return render(request, 'core/tools_list.html', {'users_count': users_count})
+
+
+# 📍 CLICK ORQALI EHSON QILISH FUNKSIYASI
+def click_donation_view(request):
+    # Formadan yuborilgan miqdorni olamiz, agar bo'sh bo'lsa standart 5000 so'm
+    amount = request.GET.get('amount', 5000)
+
+    # ⚠️ MUHIM: Bu yerga Click Merchant kabinetingizdagi haqiqiy ID'larni yozasiz
+    SERVICE_ID = "YOUR_CLICK_SERVICE_ID"
+    MERCHANT_ID = "YOUR_CLICK_MERCHANT_ID"
+
+    # Noyob tranzaksiya identifikatori (masalan: ehson_171829381)
+    transaction_param = f"ehson_{int(time.time())}"
+
+    # Click billing tizimining rasmiy to'lov havolasi
+    click_url = (
+        f"https://my.click.uz/services/pay"
+        f"?service_id={SERVICE_ID}"
+        f"&merchant_id={MERCHANT_ID}"
+        f"&amount={amount}"
+        f"&transaction_param={transaction_param}"
+    )
+
+    # Foydalanuvchini avtomatik tarzda Click sahifasiga yo'naltirish
+    return redirect(click_url)
 
 
 # 3. QR Kod yaratuvchi asbob
@@ -289,13 +315,11 @@ def race_arena(request):
 # 📍 MUKAMMAL, 100% DINAMIK YANGILANUVCHI PESHQADAMLAR JADVALI LOGIKASI
 @login_required(login_url='login')
 def races_list(request):
-    # Har bir foydalanuvchining bazadagi ENG YUQORI WPM qiymatini aniqlaymiz (xato testlarni cheklash uchun aniqlik 50% dan baland bo'lishi kerak)
     top_results = TypingResult.objects.filter(accuracy__gte=50).values('user').annotate(max_wpm=Max('wpm')).order_by(
         '-max_wpm')[:10]
 
     leaderboard = []
     for entry in top_results:
-        # Aynan o'sha foydalanuvchining eng yuqori WPM ga ega bo'lgan eng so'nggi va eng mos satrini yuklaymiz
         result = TypingResult.objects.filter(
             user_id=entry['user'],
             wpm=entry['max_wpm'],
@@ -320,7 +344,6 @@ def save_race_result(request):
             if new_wpm <= 0:
                 return JsonResponse({'status': 'ignored', 'is_new_record': False, 'best_wpm': 0})
 
-            # Bazadagi haqiqiy shaxsiy maksimal rekordni topamiz (faqat real natijalar tekshiriladi)
             highest_wpm_data = TypingResult.objects.filter(user=request.user, accuracy__gte=50).aggregate(Max('wpm'))
             highest_wpm = highest_wpm_data['wpm__max']
 
@@ -336,7 +359,6 @@ def save_race_result(request):
                 is_new_record = False
                 best_to_return = highest_wpm
 
-            # Natijani bazaga qat'iy saqlaymiz
             TypingResult.objects.create(user=request.user, wpm=new_wpm, accuracy=new_accuracy)
 
             return JsonResponse({

@@ -92,9 +92,14 @@
                         <h5 class="text-white fw-bold mb-2"><i class="fa-solid fa-heart text-danger me-1"></i> Loyiha sizga yoqdimi?</h5>
                         <p class="text-secondary small mb-3">Agar dasturimiz sizga ma'qul kelgan bo'lsa va yordami tekkan bo'lsa, loyihani rivojlantirishga hissa qo'shishingiz mumkin.</p>
 
-                        <a href="https://click.uz/" target="_blank" class="btn btn-primary px-4 py-2.5 fw-bold rounded-pill shadow-sm" style="background: linear-gradient(135deg, #0056B3 0%, #007BFF 100%); border: none; transition: 0.3s;">
-                            <i class="fa-solid fa-credit-card me-2"></i> Click orqali qo'llab-quvvatlash
-                        </a>
+                        <form action="{% url 'click_donation' %}" method="GET" class="d-flex flex-column flex-sm-row gap-2 justify-content-center id-donation-form">
+                            <div class="position-relative" style="max-width: 280px; width: 100%; margin: 0 auto;">
+                                <input type="number" name="amount" min="1000" step="1000" class="form-control rounded-pill bg-dark text-white text-center border-secondary shadow-none" placeholder="Ehson summasi (so'm)" required style="height: 46px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-pill shadow-sm" style="background: linear-gradient(135deg, #0056B3 0%, #007BFF 100%); border: none; transition: 0.3s; height: 46px; margin: 0 auto;">
+                                <i class="fa-solid fa-credit-card me-2"></i> Click orqali qo'llab-quvvatlash
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -107,6 +112,16 @@
     /* Karta ustiga sichqoncha kelganda chiroyli effekt berish uchun */
     .card-hover:hover {
         transform: translateY(-3px);
+    }
+
+    /* Input ichidagi o'qchalarni (spinners) olib tashlash */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
     }
 </style>
 {% endblock %}
